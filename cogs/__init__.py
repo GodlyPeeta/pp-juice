@@ -3,3 +3,4 @@ from .osu import OSU
 from .general import GENERAL
 from .random import RANDOM
 from .voice import VOICE
+from .youtube import YOUTUBE

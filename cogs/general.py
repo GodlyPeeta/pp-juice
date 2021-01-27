@@ -7,6 +7,7 @@ from discord.utils import get
 from discord import Webhook, RequestsWebhookAdapter, File
 from discord import *
 import utils
+import config
 from discord.ext import tasks
 import datetime
 
@@ -130,7 +131,7 @@ osuset = command("osuset", "Binds your profile to the bot, so you don't need to 
 top = command("top", "Finds the top 5 plays of a user", "pp.top <name>", "pp.top GodlyPeeta", "osutop, tp")
 recent = command("recent", "Gives info on the most recent play of a user", "pp.recent <name>", "pp.recent GodlyPeeta", "ors, rs, rc")
 leaderboard = command("leaderboard", "Shows the top players in the server", "pp.leaderboard", "pp.leaderboard", "lb")
-scores = command("scores", "Gets a user's top score on a map", "pp.scores <link> <name>", "pp.scores https://osu.ppy.sh/beatmapsets/798007#osu/1675844 GodlyPeeta", "sc, score")
+scores = command("scores", "Gets a user's top score on a map", "pp.scores <link> <name and/or mods>", "pp.scores https://osu.ppy.sh/beatmapsets/798007#osu/1675844 GodlyPeeta +dt", "sc, score")
 osutrack = command("osutrack", "Alerts this channel whenever the user has set a top score within the limit (defauts to 50)", "pp.osutrack <osu username> <limit>", "pp.osutrack GodlyPeeta 50")
 stoposutrack = command("stoposutrack", "Stops tracking the user", "pp.stoposutrack <osu username>", "pp.osutrack GodlyPeeta")
 strains = command("strains", "Renders a graph of the difficulty of parts of a map", "pp.strains <link>", "pp.strains https://osu.ppy.sh/b/1805627", "strain")
@@ -153,7 +154,12 @@ minesweeper = command("minesweeper", "Minesweeper (7x7 5 bombs by default)", "pp
 
 randomCog = cog("random", [wpm, minesweeper])
 
-cogs = [osuCog, randomCog, generalCog]
+ytadd = command('ytadd', 'Adds a youtube channel to track, when a new video comes out it will show up in the set channel. (if discord channelID field is empty, defaults to current channel)', 'pp.ytadd <channel link> <discord channelID>', 'pp.ytadd https://www.youtube.com/channel/UC1DCedRgGHBdm81E1llLhOQ 123123123')
+ytdel = command('ytdel', 'Removes a channel from being tracked (if discord channelID field is empty, defaults to current channel)', 'pp.ytdel <channel link> <discord channelID>', 'pp.ytdel https://www.youtube.com/channel/UC1DCedRgGHBdm81E1llLhOQ')
+
+ytCog = cog('youtube', [ytadd, ytdel])
+
+cogs = [osuCog, randomCog, generalCog, ytCog]
 
 class GENERAL(commands.Cog):
     def __init__(self, bot):
@@ -262,7 +268,10 @@ class GENERAL(commands.Cog):
 
     @commands.command()
     async def test(self, ctx):
-        logChannel = self.bot.get_channel(771776176359473152)
+        #495327409487478787
+        channelb = self.bot.get_channel(495327409487478787)
+        await channelb.send('https://cdn.discordapp.com/attachments/644268290474115075/803800435039272980/unknown.png haha ur all slow')
+        #logChannel = self.bot.get_channel(771776176359473152)
         return
 
 

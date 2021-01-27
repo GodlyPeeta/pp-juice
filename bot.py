@@ -228,6 +228,7 @@ bot.add_cog(cogs.OSU(bot))
 bot.add_cog(cogs.GENERAL(bot))
 bot.add_cog(cogs.RANDOM(bot))
 bot.add_cog(cogs.VOICE(bot))
+bot.add_cog(cogs.YOUTUBE(bot))
 
 stalkerBot = commands.Bot(command_prefix=prefix, intents=intents)
 
@@ -248,6 +249,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    #print(message.content)
     #if message.author.name == "GodlyPeeta":
     #    await message.channel.send(f"***__ALERT__***:rotating_light::rotating_light::rotating_light::rotating_light:\n<@!388098902680928270>, whose birthday is today, just said: `{message.content}`\n***__END OF ALERT__***")
     #print(str(message.author) + " : " + str(message.content))

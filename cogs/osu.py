@@ -771,6 +771,9 @@ class OSU(commands.Cog):
                 id = beatmapID[i] + id
 
         b = api.get_beatmaps({'b': id})[0]
+        if int(b['total_length']) >= 1800:
+            await ctx.send("Too long (pls stop trying to ddos my bot <:blobuwu:757660919722541125>)")
+            return
         f = open('mapdata.txt', 'wb')
         f.write(requests.get('https://osu.ppy.sh/osu/' + id).text.encode('utf-8'))
         f2 = strain.graph('mapdata.txt', b['title'])
@@ -828,7 +831,28 @@ class OSU(commands.Cog):
         await ctx.send('Stopped tracking ' + user)
 
     @commands.command(pass_context=True, aliases=['sc', 'score'])
-    async def scores(self, ctx, beatmapID, user=None):
+    async def scores(self, ctx, beatmapID, *args):
+        user=''
+        mods=''
+        if args is None:
+            user=None
+            mods=''
+        else:
+            for a in args:
+                if a[0]=='+':
+                    mods+=a
+                else:
+                    user+=a+' '
+
+        if user=='':
+            user=None              
+        else:
+            user=user[:-1] 
+
+
+        print(user)
+        print(mods)
+        
         database = config.DB_PATH
         conn = create_connection(database)
         id = ''
@@ -837,16 +861,53 @@ class OSU(commands.Cog):
                 if beatmapID[i] == '/':
                     break
                 id = beatmapID[i] + id
-
+        
+        
         if user is None:
             try:
                 user = get_user_osu(conn, ctx.author.id)
             except:
                 await ctx.send('user has not set a profile (`pp.osuset osuUsername`)')
                 return
+        
+        #mods=mods[1:]
+        mods = mods.lower()        
+        diffMods=None
+        if mods == '':
+            diffMods=None
+        elif mods != '+nm': 
+            diffMods=0
+            if 'nf' in mods:
+                diffMods+=1
+            if 'ez' in mods:
+                diffMods+=2
+            if 'td' in mods:
+                diffMods+=4
+            if 'hd' in mods:
+                diffMods+=8
+            if 'hr' in mods:
+                diffMods+=16
+            if 'sd' in mods:
+                diffMods+=32
+            if 'dt' in mods:
+                diffMods+=64
+            if 'ht' in mods:
+                diffMods+=256
+            if 'nc' in mods:
+                diffMods+=576
+            if 'fl' in mods:
+                diffMods+=1024
+            if 'so' in mods:
+                diffMods+=4096
+        else:
+            diffMods=0
+        #print(diffMods)
 
         try:
-            r = api.get_scores({'b':id,  'u':user})[0]
+            if diffMods is not None:
+                r = api.get_scores({'b':id,  'u':user, 'mods':diffMods})[0]
+            else: 
+                r = api.get_scores({'b':id,  'u':user})[0]
         except:
             await ctx.send('**user has not passed this map**')
             return
@@ -869,14 +930,14 @@ class OSU(commands.Cog):
         urllib.request.urlretrieve(url, 'lib/map.txt')
         acc = (50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300'])))
         if r['perfect'] == '0':
-            fc = f"(FC: {ppcalc.ppcalculate(acc * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False)[0]})"
+            fc = f"(FC: {ppcalc.ppcalculate( (300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False)[0]})"
         else:
             fc = ''
         ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), modsStr, 'lib/map.txt', False)
         completed = ''
         if r['rank'] == 'F':
             completed = f"\nCompleted: {round((int(r['count50']) + int(r['count100']) + int(r['count300']) + int(r['countmiss'])) / (int(b['count_normal']) + int(b['count_slider']) + int(b['count_spinner'])) * 100, 2)}%"
-        desc = f"[[{b['version']}][{ppc[6]}★]](https://osu.ppy.sh/b/{b['beatmap_id']}){modsStr}\n\n**{ppc[0]}pp** {fc} | {round(acc * 100, 2)}%\n{int(r['score']):,} | {r['maxcombo']}/{b['max_combo']} | [{r['count300']}/{r['count100']}/{r['count50']}/{r['countmiss']}]{completed}\n\n__**Beatmap Info:**__\n**BPM: **{int(float(b['bpm']) * ppc[7])} **Length:** {time.strftime('%M:%S', time.gmtime(round(int(b['total_length']) / ppc[7], 0)))}\n **CS:** {ppc[2]} **OD: **{ppc[3]} **AR: **{ppc[1]} **HP: **{ppc[8]}"
+        desc = f"[[{b['version']}][{ppc[6]}★]](https://osu.ppy.sh/b/{b['beatmap_id']}){modsStr}\n\n**{r['pp']}pp** {fc} | {round(acc * 100, 2)}%\n{int(r['score']):,} | {r['maxcombo']}/{b['max_combo']} | [{r['count300']}/{r['count100']}/{r['count50']}/{r['countmiss']}]{completed}\n\n__**Beatmap Info:**__\n**BPM: **{int(float(b['bpm']) * ppc[7])} **Length:** {time.strftime('%M:%S', time.gmtime(round(int(b['total_length']) / ppc[7], 0)))}\n **CS:** {ppc[2]} **OD: **{ppc[3]} **AR: **{ppc[1]} **HP: **{ppc[8]}"
         embed = discord.Embed(title=(f"{b['title']}"), url=('https://osu.ppy.sh/b/' + b['beatmap_id']), description=desc, color=16748262)
         rankLink = rankLinks[r['rank'].lower()]
         status = int(b['approved'])
@@ -995,7 +1056,7 @@ class OSU(commands.Cog):
         urllib.request.urlretrieve(url, 'lib/map.txt')
         acc = (50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300'])))
         if r['perfect'] == '0':
-            fc = f"(FC: {ppcalc.ppcalculate(acc * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False)[0]})"
+            fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False)[0]})"
         else:
             fc = ''
         ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), modsStr, 'lib/map.txt', False)
@@ -1183,7 +1244,10 @@ class OSU(commands.Cog):
 
     @commands.command()
     async def testOsu(self, ctx, user=None, arg=None, num=5):
-        print(utils.get_beatmaplink_all(self.conn))
+        #await ctx.send("https://a.ppy.sh/12771805")
+        embed=discord.Embed(title="test",url='osu://b/2628166',thumbnail='https://a.ppy.sh/12771805', description="[test](osu://b/2628166)")
+        await ctx.send(embed=embed)
+        #print(utils.get_beatmaplink_all(self.conn))
 
     @tasks.loop(seconds=4)
     async def osutracker(self):
@@ -1234,7 +1298,7 @@ class OSU(commands.Cog):
                     b = api.get_beatmaps({'b':p[v]['beatmap_id'],  'mods':modsInt})[0]
                     acc = (50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300'])))
                     if r['perfect'] == '0':
-                        fc = f"(FC: {ppcalc.ppcalculate(acc * 100, int(b['max_combo']), 0, modsStr, 'https://osu.ppy.sh/osu/' + str(id), True)[0]})"
+                        fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'https://osu.ppy.sh/osu/' + str(id), True)[0]})"
                     else:
                         fc = ''
                     completed = ''
