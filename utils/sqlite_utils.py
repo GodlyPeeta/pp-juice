@@ -61,3 +61,33 @@ def create_connection(db_file):
         print(e)
 
     return conn
+
+def add_yt_channel_notif(conn, id):
+    sql = ' INSERT INTO youtubenotifs(id, channels)\n              VALUES(?,?) '
+    cur = conn.cursor()
+    cur.execute(sql, id)
+    conn.commit()
+    return cur.lastrowid
+
+def del_yt_channel_notif(conn, id):
+    cur = conn.cursor()
+    cur.execute('DELETE FROM youtubenotifs WHERE id=?', id)
+    conn.commit()
+
+def yt_notif_getchannels(conn, id):
+    cur = conn.cursor()
+    cur.execute('SELECT channels FROM youtubenotifs WHERE id=?', id)
+    rows = cur.fetchall()
+    return rows[0][0]
+
+def yt_notif_lastVid(conn, id):
+    sql = 'UPDATE youtubenotifs SET lastVid= ? WHERE id = ?'
+    cur = conn.cursor()
+    cur.execute(sql, id)
+    conn.commit()
+
+def yt_notif_getAll(conn):
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM youtubenotifs')
+    rows = cur.fetchall()
+    return rows
