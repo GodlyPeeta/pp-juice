@@ -313,6 +313,7 @@ class OSU(commands.Cog):
     def beatmaplinkembed(link):
         id = ''
         if link[:8] == 'https://':
+            link=link.split()[0]
             for i in range(len(link) - 1, 0, -1):
                 if link[i] == '/':
                     break
@@ -345,7 +346,7 @@ class OSU(commands.Cog):
                                     status = 'Graveyard'
         url = 'https://osu.ppy.sh/osu/' + id
         urllib.request.urlretrieve(url, 'lib/map.txt')
-        desc = f"**Map length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))} **BPM: **{b['bpm']} **Combo:** {b['max_combo']}\n**CS:** {b['diff_size']} **OD:** {b['diff_overall']} **AR:** {b['diff_approach']} **HP:** {b['diff_drain']}\n\n**90%** - {ppcalc.ppcalculate(90, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **95%** - {ppcalc.ppcalculate(95, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **97%** - {ppcalc.ppcalculate(97, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} \n**98%** - {ppcalc.ppcalculate(98, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **99%** - {ppcalc.ppcalculate(99, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **100%** - {ppcalc.ppcalculate(100, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]}"
+        desc = f"**Map length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))} **BPM: **{b['bpm']} **Combo:** {b['max_combo']}\n**CS:** {b['diff_size']} **OD:** {b['diff_overall']} **AR:** {b['diff_approach']} **HP:** {b['diff_drain']}\n[download](https://beatconnect.io/b/{b['beatmapset_id']})\n**90%** - {ppcalc.ppcalculate(90, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **95%** - {ppcalc.ppcalculate(95, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **97%** - {ppcalc.ppcalculate(97, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} \n**98%** - {ppcalc.ppcalculate(98, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **99%** - {ppcalc.ppcalculate(99, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **100%** - {ppcalc.ppcalculate(100, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]}"
         embed = discord.Embed(title=f"{b['title']} **[{b['version']}]** {round(float(b['difficultyrating']), 2)}★",
             description=desc,
             url=f"https://osu.ppy.sh/b/{id}",
@@ -390,7 +391,7 @@ class OSU(commands.Cog):
 
         p = api.get_user({'u': user})
         if p == []:
-            await ctx.send('cannot find user')
+            await ctx.send('cannot find user (set own profile with `pp.osuset osuUsername`)')
             return
         p = p[0]
         desc2 = f"**Ranked Score: ** {int(p['ranked_score']):,} \n**Hit Accuracy: ** {round(float(p['accuracy']), 2)}% \n**Play Count:   ** {int(p['playcount']):,}\n\n"
@@ -531,25 +532,29 @@ class OSU(commands.Cog):
             rankLink = rankLinks['ssh']
         else:
             pass
-        if hasHidden and acc >= 93 and misses == 0:
-            rankLink = rankLinks['sh']
+        
+        if hasHidden and acc==100:
+            rankLink = rankLinks['ssh']
         else:
-            if acc == 100 or acc == 0:
-                rankLink = rankLinks['ss']
+            if hasHidden and acc >= 93 and misses == 0:
+                rankLink = rankLinks['sh']
             else:
-                if acc >= 93 and misses == 0:
-                    rankLink = rankLinks['s']
+                if acc == 100 or acc == 0:
+                    rankLink = rankLinks['ss']
                 else:
-                    if not acc > 90 or misses == 0 or acc > 93:
-                        rankLink = rankLinks['a']
+                    if acc >= 93 and misses == 0:
+                        rankLink = rankLinks['s']
                     else:
-                        if not acc > 80 or misses == 0 or acc > 85:
-                            rankLink = rankLinks['b']
+                        if not acc > 90 or misses == 0 or acc > 93:
+                            rankLink = rankLinks['a']
                         else:
-                            if acc > 70:
-                                rankLink = rankLinks['c']
+                            if not acc > 80 or misses == 0 or acc > 85:
+                                rankLink = rankLinks['b']
                             else:
-                                rankLink = rankLinks['d']
+                                if acc > 70:
+                                    rankLink = rankLinks['c']
+                                else:
+                                    rankLink = rankLinks['d']
                                     
         status = int(b['approved'])
         if status == 4:
@@ -1015,8 +1020,10 @@ class OSU(commands.Cog):
         desc = ''
         for i in range(len(top)):
             osuName = get_user_osu(conn, items[i])
+            if osuName == 'SparklMastr':
+                osuName = 'Who?'
             desc += f"{i + 1}. **[{osuName}](https://osu.ppy.sh/u/{osuName})** - {values[i]}pp\n"
-            if i == 8:
+            if i == 9:
                 break
 
         embed = discord.Embed(title=f"Leaderboard for {ctx.guild.name}", description=desc, color=16748262)

@@ -249,6 +249,9 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if str(message.author.id) == "414848078244347904":
+        if (utils.roll(2)):
+            await message.channel.send("you are  bad")
     #print(message.content)
     #if message.author.name == "GodlyPeeta":
     #    await message.channel.send(f"***__ALERT__***:rotating_light::rotating_light::rotating_light::rotating_light:\n<@!388098902680928270>, whose birthday is today, just said: `{message.content}`\n***__END OF ALERT__***")

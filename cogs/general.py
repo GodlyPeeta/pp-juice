@@ -270,7 +270,7 @@ class GENERAL(commands.Cog):
     async def test(self, ctx):
         #495327409487478787
         channelb = self.bot.get_channel(495327409487478787)
-        await channelb.send('https://cdn.discordapp.com/attachments/644268290474115075/803800435039272980/unknown.png haha ur all slow')
+        #await channelb.send('https://cdn.discordapp.com/attachments/644268290474115075/803800435039272980/unknown.png haha ur all slow')
         #logChannel = self.bot.get_channel(771776176359473152)
         return
 
@@ -315,9 +315,11 @@ class GENERAL(commands.Cog):
         #print(f"{lastD} {date}")
         current_time = datetime.datetime.now()  
         if current_time.day != date:
+            channelb = self.bot.get_channel(766524355898245131)
             fw = open("lib\chrllFeet.txt", "w")
             fw.write(f"{lastD+1}\n{current_time.day}")
             webhook2 = Webhook.partial(766347428923441173, '_crFnW3tNxYSCl6LkBfqwIZ33UT3XkzRgNXHKZ2r6qSXBVZoxopvvnYBW_weKDbpICOo', adapter=RequestsWebhookAdapter())
             #user = get(self.bot.get_all_members(), id=639545986884304896)
             #print(user)
             webhook2.send(f"day {lastD}: <@!158691947890868224> send feet pics", username = "epic chrll fan", avatar_url="https://cdn.discordapp.com/avatars/639545986884304896/c30d9061ab961adbeacf662a6fe6d6fe.png?size=128")
+            await channelb.send(f"It has been {abs(130-lastD)} days since Hu Tao banner :)))))))")
