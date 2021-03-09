@@ -202,13 +202,54 @@ rgb_im.show()
 im.save("p6.png", 'PNG')'''
 
 #from pyyoutube import Api
-api='AIzaSyCOHR7QL19fSYppTJu8jWr9LCF2b09U7Kk'
-#print(channel_by_id.items)
+#api='AIzaSyCOHR7QL19fSYppTJu8jWr9LCF2b09U7Kk'
+#rint(channel_by_id.items)
 #print(channel_by_id.items[0].to_dict())
-import requests
-print(api)
-r=requests.get('https://www.googleapis.com/youtube/v3/channels?part=snippet&id=UCcAATkbSSyV8WGYaCcIZ-HA&key=AIzaSyCOHR7QL19fSYppTJu8jWr9LCF2b09U7Kk')
+#import requests
+#print(api)
+#r=requests.get('https://www.googleapis.com/youtube/v3/channels?part=snippet&id=UCcAATkbSSyV8WGYaCcIZ-HA&key=AIzaSyCOHR7QL19fSYppTJu8jWr9LCF2b09U7Kk')
 #print(r.json())
-b=r.json()
-print(b['items'])
+#b=r.json()
+#print(b['items'])
 #print(r.text)
+#https://discord.com/api/webhooks/747235308537512007/Mpi1KwUtMVA9Qina0SdTI7eUkl7V2uKPywiPSDeozXrgWpkGha0h50R7sGfzNUYBJqwG
+'''import discord
+from discord.ext import commands
+from discord.ext import tasks
+#import cogs
+import sqlite3
+from sqlite3 import Error
+import time
+from discord import Webhook, RequestsWebhookAdapter, File
+from discord.utils import get
+import config
+from datetime import date
+import datetime  
+#import utils
+import sys
+import time
+import io
+webhook = Webhook.partial("747235308537512007","Mpi1KwUtMVA9Qina0SdTI7eUkl7V2uKPywiPSDeozXrgWpkGha0h50R7sGfzNUYBJqwG",
+                                  adapter=RequestsWebhookAdapter())
+webhook.send("@everyone")'''
+
+q=chr(34)
+s=[
+"q=chr(34)",
+"s=[",
+"]",
+"print(s[0])",
+"print(s[1])",
+"for i in range(len(s)):",
+"    print(q+s[i]+q+',')",
+"print(s[2])",
+"for i in range(3, len(s)):",
+"    print(s[i])",
+]
+print(s[0])
+print(s[1])
+for i in range(len(s)):
+    print(q+s[i]+q+',')
+print(s[2])
+for i in range(3, len(s)):
+    print(s[i])

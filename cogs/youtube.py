@@ -7,14 +7,14 @@ import cogs
 import config
 import time
 import utils
-
+#1-0 sparkl
 class YOUTUBE(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.database = config.DB_PATH
         self.counter = 0
         self.conn = utils.create_connection(self.database)
-        self.ytnotifs.start()
+        #self.ytnotifs.start()
     
     @commands.command()
     async def ytest(self, ctx):
