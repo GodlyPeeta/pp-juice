@@ -232,24 +232,11 @@ import io
 webhook = Webhook.partial("747235308537512007","Mpi1KwUtMVA9Qina0SdTI7eUkl7V2uKPywiPSDeozXrgWpkGha0h50R7sGfzNUYBJqwG",
                                   adapter=RequestsWebhookAdapter())
 webhook.send("@everyone")'''
-
-q=chr(34)
-s=[
-"q=chr(34)",
-"s=[",
-"]",
-"print(s[0])",
-"print(s[1])",
-"for i in range(len(s)):",
-"    print(q+s[i]+q+',')",
-"print(s[2])",
-"for i in range(3, len(s)):",
-"    print(s[i])",
-]
-print(s[0])
-print(s[1])
-for i in range(len(s)):
-    print(q+s[i]+q+',')
-print(s[2])
-for i in range(3, len(s)):
-    print(s[i])
+i = 0
+while True:
+    i += 1
+    print("akjds");
+    if ((2**i) + (5**i) - i % 1000) == 0:   
+        print("asd");
+        break
+print(i)

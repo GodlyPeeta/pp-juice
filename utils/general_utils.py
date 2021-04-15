@@ -20,13 +20,10 @@ import os
 import time
 import random
 
-def roll(per): #returns a true or false given a %
+def roll(per):
     outof=100
     
-    if random.uniform(0, outof) <= per:
-        return True
-    else:
-        return False
+    return (random.uniform(0, outof) <= per)
 
 def edit_dist(s, t):
     dist = [[0 for i in range(len(t)+1)] for j in range(2)]
