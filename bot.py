@@ -250,7 +250,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     if str(message.author.id) == "414848078244347904":
-        if (utils.roll(2)):
+        if (utils.roll(10)):
             await message.channel.send("you are  bad")
     #print(message.content)
     #if message.author.name == "GodlyPeeta":
@@ -266,19 +266,19 @@ async def on_message(message):
             await message.channel.send(embed = cogs.OSU.beatmaplinkembed(message.content))
     if message.channel.id == 771776176359473152 or message.channel.id == 771772013198049280:
         return
-    logChannel = bot.get_channel(771776176359473152)
-    await logChannel.send(f"[{message.created_at}]{message.guild.name} - #{message.channel.name}, {message.author}: {message.content}\n{message.jump_url}")
-    for e in message.embeds:
-        await logChannel.send(embed=e)
-    for a in message.attachments:
-        b=123
-        buf = io.BytesIO()
-        await a.save(buf)
-        buf.seek(0)
-        await logChannel.send(file = discord.File(buf, filename='aaa.png'))
+    #logChannel = bot.get_channel(771776176359473152)
+    #await logChannel.send(f"[{message.created_at}]{message.guild.name} - #{message.channel.name}, {message.author}: {message.content}\n{message.jump_url}")
+    #for e in message.embeds:
+    #    await logChannel.send(embed=e)
+    #for a in message.attachments:
+    #    b=123
+    #    buf = io.BytesIO()
+    #    await a.save(buf)
+    #    buf.seek(0)
+    #    await logChannel.send(file = discord.File(buf, filename='aaa.png'))
     if message.author.bot == True:
         return
-
+    
     msg = message.content
 
     el = get_all_emotes(conn, (message.guild.id,))
@@ -287,7 +287,7 @@ async def on_message(message):
     for e in el:
         msg2=msg2.replace(f":{e[1]}:", f"<a:{e[1]}:{e[2]}>")
     #print(msg2)
-    if msg2 != msg:
+    if msg2 != msg and message.author.id!=388098902680928270:
         print("Got")
         msg2 = msg2.replace("@", "")
 

@@ -365,7 +365,7 @@ class pp_calc_result:
         self.acc_pp = 0
 
 
-def pp_calc(aim, speed, b, misses, c100, c50, used_mods=mods(), combo=0xFFFF, score_version=1, c300=0xFFFF):
+def pp_calc(aim, speed, b, misses, c100, c50, used_mods=mods(), combo=0xFFFF, score_version=1, c300=0xFFFF, actualc50=0):
     res = pp_calc_result()
     od = b.od
     ar = b.ar
@@ -404,7 +404,12 @@ def pp_calc(aim, speed, b, misses, c100, c50, used_mods=mods(), combo=0xFFFF, sc
     length_bonus = 0.95 + 0.4 * min(1.0, total_hits_over_2k) + (
         math.log10(total_hits_over_2k) * 0.5 if total_hits > 2000 else 0.0)
 
-    miss_penalty = math.pow(0.97, misses)
+    #miss_penalty = math.pow(0.97, misses) OLD
+    if misses == 0:
+        miss_penalty = 1
+    else:
+        #print(circles);
+        miss_penalty = 0.97*math.pow((1-math.pow((misses/b.num_objects), 0.775)), misses)
 
     combo_break = math.pow(combo, 0.8) / math.pow(b.max_combo, 0.8)
 
@@ -412,13 +417,22 @@ def pp_calc(aim, speed, b, misses, c100, c50, used_mods=mods(), combo=0xFFFF, sc
     aim_value *= miss_penalty
     aim_value *= combo_break
     ar_bonus = 1.0
-
-    if ar > 10.33:
+    speed_ar = 1.0
+    aim_ar = 1.0
+    '''if ar > 10.33:
         ar_bonus += 0.3 * (ar - 10.33)
-    elif ar < 8:
-        ar_bonus += 0.01 * (8.0 - ar)
+    elif ar < 8: OLD
+        ar_bonus += 0.01 * (8.0 - ar)'''
+    if ar>=10.33:
+        if b.num_objects >= 1000:
+            aim_ar = 1.266
+        else:
+            aim_ar = 1+0.266*((ar-10.33)/0.67)*(b.num_objects/1000)
+        speed_ar = aim_ar
+    elif ar <= 8:
+        aim_ar += 0.01 * (8.0 - ar)
 
-    aim_value *= ar_bonus
+    aim_value *= aim_ar
     hd_bonus = 1.0
     if used_mods.hd:
         hd_bonus = 1.0 + 0.04 * (12 - ar)
@@ -442,12 +456,18 @@ def pp_calc(aim, speed, b, misses, c100, c50, used_mods=mods(), combo=0xFFFF, sc
     speed_value *= length_bonus
     speed_value *= miss_penalty
     speed_value *= combo_break
-    if (ar > 10.33):
-        speed_value *= ar_bonus
+    if (ar >= 10.33):
+        speed_value *= speed_ar
     speed_value *= hd_bonus
-    speed_value *= 0.02 + acc
-    speed_value *= 0.96 + (math.pow(od, 2) / 1600)
-
+    #speed_value *= 0.02 + acc OLD
+    #speed_value *= 0.96 + (math.pow(od, 2) / 1600) OLD
+    #temp1=speed_value
+    speed_value *= math.pow(acc, (14.5-max(od, 8))/2)
+    speed_value *= 0.95 + (math.pow(od, 2)/750)
+    #print(speed_value/temp1)
+    if b.num_objects/500 < actualc50:
+        speed_value *= math.pow(0.98, actualc50-(b.num_objects/500))
+    #speed_value*=1.01
     res.speed_pp = speed_value
 
     real_acc = 0.0
@@ -459,6 +479,9 @@ def pp_calc(aim, speed, b, misses, c100, c50, used_mods=mods(), combo=0xFFFF, sc
         if circles:
             real_acc = ((c300 - (total_hits - circles)) * 300.0 + c100 * 100.0 + c50 * 50.0) / (circles * 300)
         real_acc = max(0.0, real_acc)
+    #print(real_acc)
+    print(acc)
+    #real_acc=acc
 
     acc_value = math.pow(1.52163, od) * math.pow(real_acc, 24.0) * 2.83
 
@@ -475,16 +498,20 @@ def pp_calc(aim, speed, b, misses, c100, c50, used_mods=mods(), combo=0xFFFF, sc
     final_multiplier = 1.12
 
     if used_mods.nf:
-        final_multiplier *= 0.90
+        if misses>5:
+            final_multiplier*=0.9
+        else:
+            final_multiplier*=1-(0.02*misses)
 
     if used_mods.so:
-        final_multiplier *= 0.95
+        final_multiplier *= 1-math.pow((b.num_spinners/b.num_objects), 0.85)
     res.pp = math.pow(math.pow(aim_value, 1.1) + math.pow(speed_value, 1.1) + math.pow(acc_value, 1.1),
                       1.0 / 1.1) * final_multiplier
+    print(f"{aim_value} {speed_value} {acc_value}")
     return res;
 
 
-def pp_calc_acc(aim, speed, b, acc_percent, used_mods=mods(), combo=0xFFFF, misses=0, score_version=1):
+def pp_calc_acc(aim, speed, b, acc_percent, used_mods=mods(), combo=0xFFFF, misses=0, actualc50=0, score_version=1):
     misses = min(b.num_objects, misses)
 
     max300 = (b.num_objects - misses)
@@ -504,8 +531,9 @@ def pp_calc_acc(aim, speed, b, acc_percent, used_mods=mods(), combo=0xFFFF, miss
         c100 = min(max300, c100)
 
     c300 = b.num_objects - c100 - c50 - misses
+    print(f"{c300} {c100} {c50} {misses}")
 
-    return pp_calc(aim, speed, b, misses, c100, c50, used_mods, combo, score_version, c300)
+    return pp_calc(aim, speed, b, misses, c100, c50, used_mods, combo, score_version, c300, actualc50)
 
 
 def main(file):
@@ -760,11 +788,12 @@ def set_mods(mod, m):
         mod.td = 1
 
 
-def ppcalculate(ac, co, mi, mo, link, feature=True):
+def ppcalculate(ac, co, mi, mo, link, feature=True, c50=0):
     print(f"ppcalculate activated with: {ac} {co} {mi} {mo} {link}")
     feature = feature
     c100 = 0
-    c50 = 0
+    c50 = c50
+    print(c50)
     sv = 1
     acc = ac
     combo = co
@@ -802,7 +831,7 @@ def ppcalculate(ac, co, mi, mo, link, feature=True):
     if acc == 0:
         pp = pp_calc(diff[0], diff[1], diff[3], misses, c100, c50, mod, combo, sv)
     else:
-        pp = pp_calc_acc(diff[0], diff[1], diff[3], acc, mod, combo, misses, sv)
+        pp = pp_calc_acc(diff[0], diff[1], diff[3], acc, mod, combo, misses, c50, sv)
     title = map.artist + " - " + map.title + "[" + map.version + "]"
     if mod_string != "":
         title += "+" + mod_string

@@ -935,14 +935,14 @@ class OSU(commands.Cog):
         urllib.request.urlretrieve(url, 'lib/map.txt')
         acc = (50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300'])))
         if r['perfect'] == '0':
-            fc = f"(FC: {ppcalc.ppcalculate( (300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False)[0]})"
+            fc = f"(FC: {ppcalc.ppcalculate( (300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False, int(r['count50']))[0]})"
         else:
             fc = ''
-        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), modsStr, 'lib/map.txt', False)
+        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), modsStr, 'lib/map.txt', False, int(r['count50']))
         completed = ''
         if r['rank'] == 'F':
             completed = f"\nCompleted: {round((int(r['count50']) + int(r['count100']) + int(r['count300']) + int(r['countmiss'])) / (int(b['count_normal']) + int(b['count_slider']) + int(b['count_spinner'])) * 100, 2)}%"
-        desc = f"[[{b['version']}][{ppc[6]}★]](https://osu.ppy.sh/b/{b['beatmap_id']}){modsStr}\n\n**{r['pp']}pp** {fc} | {round(acc * 100, 2)}%\n{int(r['score']):,} | {r['maxcombo']}/{b['max_combo']} | [{r['count300']}/{r['count100']}/{r['count50']}/{r['countmiss']}]{completed}\n\n__**Beatmap Info:**__\n**BPM: **{int(float(b['bpm']) * ppc[7])} **Length:** {time.strftime('%M:%S', time.gmtime(round(int(b['total_length']) / ppc[7], 0)))}\n **CS:** {ppc[2]} **OD: **{ppc[3]} **AR: **{ppc[1]} **HP: **{ppc[8]}"
+        desc = f"[[{b['version']}][{ppc[6]}★]](https://osu.ppy.sh/b/{b['beatmap_id']}){modsStr}\n\n**{ppc[0]}pp** {fc} | {round(acc * 100, 2)}%\n{int(r['score']):,} | {r['maxcombo']}/{b['max_combo']} | [{r['count300']}/{r['count100']}/{r['count50']}/{r['countmiss']}]{completed}\n\n__**Beatmap Info:**__\n**BPM: **{int(float(b['bpm']) * ppc[7])} **Length:** {time.strftime('%M:%S', time.gmtime(round(int(b['total_length']) / ppc[7], 0)))}\n **CS:** {ppc[2]} **OD: **{ppc[3]} **AR: **{ppc[1]} **HP: **{ppc[8]}"
         embed = discord.Embed(title=(f"{b['title']}"), url=('https://osu.ppy.sh/b/' + b['beatmap_id']), description=desc, color=16748262)
         rankLink = rankLinks[r['rank'].lower()]
         status = int(b['approved'])
@@ -1022,7 +1022,8 @@ class OSU(commands.Cog):
             osuName = get_user_osu(conn, items[i])
             if osuName == 'SparklMastr':
                 osuName = 'Who?'
-            desc += f"{i + 1}. **[{osuName}](https://osu.ppy.sh/u/{osuName})** - {values[i]}pp\n"
+            osuName2=osuName.replace(" ", "%20")
+            desc += f"{i + 1}. **[{osuName}](https://osu.ppy.sh/u/{osuName2})** - {values[i]}pp\n"
             if i == 9:
                 break
 
@@ -1063,10 +1064,10 @@ class OSU(commands.Cog):
         urllib.request.urlretrieve(url, 'lib/map.txt')
         acc = (50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300'])))
         if r['perfect'] == '0':
-            fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False)[0]})"
+            fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'lib/map.txt', False, int(r['count50']))[0]})"
         else:
             fc = ''
-        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), modsStr, 'lib/map.txt', False)
+        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), modsStr, 'lib/map.txt', False, int(r['count50']))
         completed = ''
         if r['rank'] == 'F':
             completed = f"\nCompleted: {round((int(r['count50']) + int(r['count100']) + int(r['count300']) + int(r['countmiss'])) / (int(b['count_normal']) + int(b['count_slider']) + int(b['count_spinner'])) * 100, 2)}%"
@@ -1305,7 +1306,7 @@ class OSU(commands.Cog):
                     b = api.get_beatmaps({'b':p[v]['beatmap_id'],  'mods':modsInt})[0]
                     acc = (50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300'])))
                     if r['perfect'] == '0':
-                        fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'https://osu.ppy.sh/osu/' + str(id), True)[0]})"
+                        fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, modsStr, 'https://osu.ppy.sh/osu/' + str(id), True, int(r['count50']))[0]})"
                     else:
                         fc = ''
                     completed = ''
@@ -1341,7 +1342,10 @@ class OSU(commands.Cog):
                     temp = i[1].split()
                     for o in temp:
                         channelb = self.bot.get_channel(int(o))
-                        await channelb.send(embed=embed)
+                        try:
+                            await channelb.send(embed=embed)
+                        except:
+                            print("ban")
 
         except Exception as e:
             try:
