@@ -249,15 +249,23 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if message.content.lower() == "ratio":
+        await message.add_reaction("❤️")
+    if message.content.lower() == "i asked" '''or str(message.author.id) == "695357678909653093"''':
+        tempmsg = await message.channel.send("ratio")
+        await tempmsg.add_reaction("❤️")
+        #await tempmsg.add_reaction("🔃️")
+
+    if message.author.bot == True:
+        return
+    if (str(message.author.id) == "773016933511200800" or str(message.author.id) == "626604979272024084" or str(message.author.id) == "414848078244347904" or str(message.author.id) == "357663900180676610") and str(message.content)[:9] == 'pp.osuset':
+        await message.channel.send("fuck off retard")
+        return 
     if str(message.author.id) == "414848078244347904":
         if (utils.roll(10)):
             await message.channel.send("you are  bad")
-    #print(message.content)
-    #if message.author.name == "GodlyPeeta":
-    #    await message.channel.send(f"***__ALERT__***:rotating_light::rotating_light::rotating_light::rotating_light:\n<@!388098902680928270>, whose birthday is today, just said: `{message.content}`\n***__END OF ALERT__***")
-    #print(str(message.author) + " : " + str(message.content))
 
-    '''for i in message.content:
+    '''for i in message.content: 
         if '''
     
     if "https://osu.ppy.sh/b" == message.content[:20]:
@@ -265,18 +273,6 @@ async def on_message(message):
             #print("kdsfjd")
             await message.channel.send(embed = cogs.OSU.beatmaplinkembed(message.content))
     if message.channel.id == 771776176359473152 or message.channel.id == 771772013198049280:
-        return
-    #logChannel = bot.get_channel(771776176359473152)
-    #await logChannel.send(f"[{message.created_at}]{message.guild.name} - #{message.channel.name}, {message.author}: {message.content}\n{message.jump_url}")
-    #for e in message.embeds:
-    #    await logChannel.send(embed=e)
-    #for a in message.attachments:
-    #    b=123
-    #    buf = io.BytesIO()
-    #    await a.save(buf)
-    #    buf.seek(0)
-    #    await logChannel.send(file = discord.File(buf, filename='aaa.png'))
-    if message.author.bot == True:
         return
     
     msg = message.content
@@ -287,7 +283,7 @@ async def on_message(message):
     for e in el:
         msg2=msg2.replace(f":{e[1]}:", f"<a:{e[1]}:{e[2]}>")
     #print(msg2)
-    if msg2 != msg and message.author.id!=388098902680928270:
+    if False and msg2 != msg and message.author.id!=388098902680928270 and message.author.id!=329639809524170755:
         print("Got")
         msg2 = msg2.replace("@", "")
 
