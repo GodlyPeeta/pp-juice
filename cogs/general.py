@@ -131,13 +131,20 @@ osuset = command("osuset", "Binds your profile to the bot, so you don't need to 
 top = command("top", "Finds the top 5 plays of a user", "pp.top <name>", "pp.top GodlyPeeta", "osutop, tp")
 recent = command("recent", "Gives info on the most recent play of a user", "pp.recent <name>", "pp.recent GodlyPeeta", "ors, rs, rc")
 leaderboard = command("leaderboard", "Shows the top players in the server", "pp.leaderboard", "pp.leaderboard", "lb")
+strains = command("strains", "Renders a graph of the difficulty of parts of a map", "pp.strains <link>", "pp.strains https://osu.ppy.sh/b/1805627", "strain")
 scores = command("scores", "Gets a user's top score on a map", "pp.scores <link> <name and/or mods>", "pp.scores https://osu.ppy.sh/beatmapsets/798007#osu/1675844 GodlyPeeta +dt", "sc, score")
+multiresults = command("multiresults", "Gets the results of a multi lobby\nIf the round argument is not used, it will show the overall winners of every round. If it is used, it will show every play in the round", "pp.multiresults <match link or id> <round>", "pp.multiresults https://osu.ppy.sh/community/matches/69483825 3", "mr, multiresult")
+recentbest = command("recentbest", "Gets the most recent play in an user's top X scores", "pp.recent best", "pp.recentbest GodlyPeeta 69", "rb")
+
+osuCog = cog("osu!", [osu, pp, osuset, top, beatmap, recent, leaderboard, scores, strains, multiresults, recentbest])
+
 osutrack = command("osutrack", "Alerts this channel whenever the user has set a top score within the limit (defauts to 50)", "pp.osutrack <osu username> <limit>", "pp.osutrack GodlyPeeta 50")
 stoposutrack = command("stoposutrack", "Stops tracking the user", "pp.stoposutrack <osu username>", "pp.osutrack GodlyPeeta")
-strains = command("strains", "Renders a graph of the difficulty of parts of a map", "pp.strains <link>", "pp.strains https://osu.ppy.sh/b/1805627", "strain")
-multiresults = command("multiresults", "Gets the results of a multi lobby\nIf the round argument is not used, it will show the overall winners of every round. If it is used, it will show every play in the round", "pp.multiresults <match link or id> <round>", "pp.multiresults https://osu.ppy.sh/community/matches/69483825 3", "mr, multiresult")
+beatmaplink = command("beatmaplink", "When a user posts a beatmap link in a channel where this is enabled, the bot will send info about the map", "pp.beatmaplink <enable or disable>", "pp.beatmaplink enable")
+mapfeed = command("mapfeed", "When a map gets ranked/loved/qualified, alert this channel (qualified also alerts for disqualified)", "pp.mapfeed <ranked/loved/qualified>", "pp.mapfeed ranked")
+stopmapfeed = command("stopmapfeed", "Stops alerting the channel of ranked/loved/qualified maps", "pp.stopmapfeed <ranked/loved/qualified>", "pp.stopmapfeed ranked")
 
-osuCog = cog("osu!", [osu, pp, osuset, top, beatmap, recent, leaderboard, scores, osutrack, stoposutrack, strains, multiresults])
+osuCog2 = cog("osu!channelstuff", [osutrack, stoposutrack, beatmaplink, mapfeed, stopmapfeed])
 
 addwebhook = command("addwebhook", "adds a webhook to the channel (for animated emotes, pp.help addemote)", "pp.addwebhook <webhook url> <channelID>", "pp.addwebhook https://discordapp.com/api/webhooks/132123131/bbbbbbbbbbbbbbbbb 644268290474115075")
 removewebhook = command("removewebhook", "Removes the webhook associated with this channel", "pp.removewebhook", "pp.removewebhook")
@@ -145,7 +152,6 @@ addemote = command("addemote", "Adds a animated emote that users without nitro c
 help = command("help", "Find help about a given command", "pp.help <command name>", "pp.help help")
 emotelist = command("emotelist", "Get a list of every animated emote given to the bot in this server, where each page has 10 emotes\n**(NOTE: Page starts at 0)**", "pp.emotelist <page number>", "pp.emotelist 1")
 removeemote = command("removeemote", "Removes a emote from the server", "pp.removeemote <emote name>", "pp.removeemote spicy")
-beatmaplink = command("beatmaplink", "When a user posts a beatmap link in a channel where this is enabled, the bot will send info about the map", "pp.beatmaplink <enable or disable>", "pp.beatmaplink enable")
 
 generalCog = cog("general", [help, addwebhook, removewebhook, addemote, emotelist, removeemote])
 
@@ -159,11 +165,11 @@ ytdel = command('ytdel', 'Removes a channel from being tracked (if discord chann
 
 ytCog = cog('youtube', [ytadd, ytdel])
 
-cogs = [osuCog, randomCog, generalCog, ytCog]
+cogs = [osuCog, osuCog2, randomCog, generalCog]
 
 class GENERAL(commands.Cog):
     def __init__(self, bot):
-        self.chrllFeet.start()
+        #self.chrllFeet.start()
         self.bot = bot
         self.curDate = 0
 
