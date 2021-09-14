@@ -1,6 +1,6 @@
-TOKEN = "Njk3MjQ0OTcyOTE0NTczNDcz.Xo_sRQ.btl4VcaBwJ-gyJz2aCbamOarqHI"
-STALKER_TOKEN = 'NzcxNzc0NzI3OTQwNjAzOTI0.X5xBOg.V97FNoJsyL6lgPkpWR39apoGV5E'
-OSU_TOKEN = ["0931c343aaf827c0202ad88a7bb95e0c360e3b53", "5eb6931294a4963fa4bb96378e6f9b3d6c9e9b50"]
+TOKEN = "token"
+STALKER_TOKEN = 'token'
+OSU_TOKEN = ["token", "token"]
 DB_PATH = "D:\pp juice bot\pp-juice\db\pythonsqlite.db"
 
 CUR_MESSAGE_COUNT = 137336  
