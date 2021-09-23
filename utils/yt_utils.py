@@ -1,9 +1,7 @@
-import ppcalc
 import asyncio
 import discord
 from discord.ext import commands
 from discord.ext import tasks
-import cogs
 import json
 from ossapi import ossapi
 from PIL import Image
