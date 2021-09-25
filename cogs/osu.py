@@ -1569,7 +1569,7 @@ class OSU(commands.Cog):
         print('waiting...')
         await self.bot.wait_until_ready()
     
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=30)
     async def mapfeeder(self):
         #print("fddsfj")
         try:
