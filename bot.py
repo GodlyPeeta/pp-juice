@@ -314,5 +314,5 @@ async def on_message(message):
         await bot.process_commands(message)
 
 
-bot.run(config.TOKEN)
+bot.run(config.DISCORD_TOKEN)
 stalkerBot.run(config.STALKER_TOKEN)

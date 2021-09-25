@@ -1,9 +1,9 @@
 from logging import exception
+from utils.osu_utils import get_beatmap_by_link, get_letter_rank
 import ppcalc, asyncio, discord
 from discord.ext import commands
 from discord.ext import tasks
 import cogs, json
-from ossapi import ossapi
 from PIL import Image
 import discord.emoji, sqlite3
 from sqlite3 import Error
@@ -15,6 +15,9 @@ import os
 import json
 import sys
 from bs4 import BeautifulSoup
+import pyttanko as pyt
+from utils import OSU_API_0 as api
+
 msgcount = 2000
 modDic = {0:'nm',
  1:'nf',
@@ -265,13 +268,6 @@ def get_user_pp(top, all, temp, i, id):
             e = None
             del e
 
-
-token = config.OSU_TOKEN[0]
-api = ossapi(token)
-apis = []
-for i in config.OSU_TOKEN:
-    apis.append(ossapi(i))
-
 rankLinks = {'a':'https://raw.githubusercontent.com/LeaPhant/flowabot/master/emotes/A_Rank.png',
  'b':'https://raw.githubusercontent.com/LeaPhant/flowabot/master/emotes/B_Rank.png',
  'c':'https://raw.githubusercontent.com/LeaPhant/flowabot/master/emotes/C_Rank.png',
@@ -320,71 +316,24 @@ class OSU(commands.Cog):
         #self.last_new_mapfeed = 0
 
     def beatmaplinkembed(link):
-        #print('jfkdjk')
-        id = ''
-        try:
-            if link[:8] == 'https://':
-                print('dfkjkd')
-                link=link.split()[0]
-                for i in range(len(link) - 1, 0, -1):
-                    if link[i] == '/':
-                        break
-                    id = link[i] + id
-        except:
-            id = int(link)
-        b = api.get_beatmaps({'b': id})
-        b = b[0]
-        if int(b['mode']) != 0:
-            print('not osu')
-            return
-        status = int(b['approved'])
-        if status == 4:
-            status = 'Loved'
-        else:
-            if status == 3:
-                status = 'Qualified'
-            else:
-                if status == 2:
-                    status = 'Approved'
-                else:
-                    if status == 1:
-                        status = 'Ranked'
-                    else:
-                        if status == 0:
-                            status = 'Pending'
-                        else:
-                            if status == -1:
-                                status = 'WIP'
-                            else:
-                                if status == -2:
-                                    status = 'Graveyard'
-                                else:
-                                    status = 'Graveyard'
-        url = 'https://osu.ppy.sh/osu/' + id
-        urllib.request.urlretrieve(url, 'lib/map.txt')
-        desc = f"**Map length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))} **BPM: **{b['bpm']} **Combo:** {b['max_combo']}\n**CS:** {b['diff_size']} **OD:** {b['diff_overall']} **AR:** {b['diff_approach']} **HP:** {b['diff_drain']}\n[download](https://beatconnect.io/b/{b['beatmapset_id']})\n**90%** - {ppcalc.ppcalculate(90, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **95%** - {ppcalc.ppcalculate(95, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **97%** - {ppcalc.ppcalculate(97, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} \n**98%** - {ppcalc.ppcalculate(98, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **99%** - {ppcalc.ppcalculate(99, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **100%** - {ppcalc.ppcalculate(100, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]}"
-        embed = discord.Embed(title=f"{b['title']} **[{b['version']}]** {round(float(b['difficultyrating']), 2)}★",
+        bex = get_beatmap_by_link(link)
+        b = bex.underlying
+        title, desc, footer = bex.make_embed()
+        embed = discord.Embed(
+            title=title,
             description=desc,
-            url=f"https://osu.ppy.sh/b/{id}",
+            url=f"https://osu.ppy.sh/b/{b.id}",
             color=16748262)
+        for acc in [90, 95, 97, 98, 99, 100]:
+            embed.add_field(acc + "%", bex.pp(acc, b.max_combo, '', 0))
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
-        if b['approved_date'] == None:
-            embed.set_footer(text=f"▶ {b['playcount']}  ❤ {b['favourite_count']} | Not approved | Mapped by {b['creator']}", icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
-        else:
-            embed.set_footer(text=f"▶ {b['playcount']}  ❤ {b['favourite_count']} | {status} on {b['approved_date'][:10]} | Mapped by {b['creator']}", icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
+        embed.set_footer(text=footer, icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
         return embed
 
     def mapfeedembed(link, status):
         #print('jfkdjk')
-        id = link
-        b = api.get_beatmaps({'s': id})
-        #print(b[0])
-        b = b[0]
-        if int(b['mode']) != 0:
-            print('not osu')
-            return
-        url = 'https://osu.ppy.sh/osu/' + id
-        urllib.request.urlretrieve(url, 'lib/map.txt')
+        bex = get_beatmap_by_link(link)
+        b = bex.underlying
         emoji = ''
         if status == "disqualified":
             emoji = "<:disagree:497545134506770453>"
@@ -394,13 +343,13 @@ class OSU(commands.Cog):
             emoji = '💖'
         elif status == 'loved':
             emoji = '♥️'
-        creatorlink = b['creator'].replace(" ", "%20")
-        desc = f"{emoji} **{status.capitalize()}!\n[{b['title']}](https://osu.ppy.sh/beatmapsets/{id})**\n[download](https://beatconnect.io/b/{b['beatmapset_id']}) Mapped by [{b['creator']}](https://osu.ppy.sh/u/{creatorlink})\n**Map length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))} **BPM: **{b['bpm']}"
+        title, desc, footer = bex.make_embed_lite()
+        desc = f"{emoji} **{bex.status_str()}!\n" + title + "\n" + desc
         embed = discord.Embed(description=desc,
             url=f"https://osu.ppy.sh/beatmapsets/{id}",
             color=16748262)
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
-        embed.set_footer(text=f"▶ {b['playcount']}  ❤ {b['favourite_count']}", icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
+        embed.set_footer(text=footer, icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
         return embed
 
     @commands.command()
@@ -439,9 +388,12 @@ class OSU(commands.Cog):
             await ctx.send('cannot find user (set own profile with `pp.osuset osuUsername`)')
             return
         p = p[0]
-        desc2 = f"**Ranked Score: ** {int(p['ranked_score']):,} \n**Hit Accuracy: ** {round(float(p['accuracy']), 2)}% \n**Play Count:   ** {int(p['playcount']):,}\n\n"
-        embed = discord.Embed(title=f"{p['username']} :flag_{p['country'].lower()}:", url=('https://osu.ppy.sh/u/' + p['user_id']),
-          description=desc2,
+        desc = f"**Ranked Score:** {int(p['ranked_score']):,}\n"
+        desc += f"**Hit Accuracy:** {round(float(p['accuracy']), 2)}%\n"
+        desc += f"**Play Count:** {int(p['playcount']):,}\n\n"
+        embed = discord.Embed(title=f"{p['username']} :flag_{p['country'].lower()}:",
+          url=('https://osu.ppy.sh/u/' + p['user_id']),
+          description=desc,
           color=16748262)
         embed.add_field(name='Play Time', value=f"{round(int(p['total_seconds_played']) / 3600 / 24, 1)} Days", inline=True)
         embed.add_field(name='pp', value=(f"{p['pp_raw']}"), inline=True)
@@ -451,71 +403,14 @@ class OSU(commands.Cog):
         embed.set_footer(text=f"Rank {p['pp_rank']} ({p['country']}: {p['pp_country_rank']})")
         await ctx.send(embed=embed)
 
-    @commands.command(pass_context=True, aliases=['bm', 'ob'])
-    async def beatmap(self, ctx, arg, scores=''):
-        id = ''
-        if arg[:8] == 'https://':
-            for i in range(len(arg) - 1, 0, -1):
-                if arg[i] == '/':
-                    break
-                id = arg[i] + id
-        else:
-            await ctx.send("No map found")
-            return
-        #else:
-        b = api.get_beatmaps({'b': id})
-        b = b[0]
-        status = int(b['approved'])
-        if status == 4:
-            status = 'Loved'
-        else:
-            if status == 3:
-                status = 'Qualified'
-            else:
-                if status == 2:
-                    status = 'Approved'
-                else:
-                    if status == 1:
-                        status = 'Ranked'
-                    else:
-                        if status == 0:
-                            status = 'Pending'
-                        else:
-                            if status == -1:
-                                status = 'WIP'
-                            else:
-                                if status == -2:
-                                    status = 'Graveyard'
-        url = 'https://osu.ppy.sh/osu/' + id
-        urllib.request.urlretrieve(url, 'lib/map.txt')
-        desc = f"**Mapped by** {b['creator']}, **Song by** {b['artist']}\n**[{b['version']}]** {round(float(b['difficultyrating']), 2)}★ **Aim:** {round(float(b['diff_aim']), 2)} **Speed:** {round(float(b['diff_speed']), 2)}\n**Map length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))} **BPM: **{b['bpm']} **Combo:** {b['max_combo']}\n**CS:** {b['diff_size']} **OD:** {b['diff_overall']} **AR:** {b['diff_approach']} **HP:** {b['diff_drain']}\n\n**90%** - {ppcalc.ppcalculate(90, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **95%** - {ppcalc.ppcalculate(95, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **97%** - {ppcalc.ppcalculate(97, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} \n**98%** - {ppcalc.ppcalculate(98, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **99%** - {ppcalc.ppcalculate(99, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]} | **100%** - {ppcalc.ppcalculate(100, int(b['max_combo']), 0, '', 'lib/map.txt', False)[0]}"
-        embed = discord.Embed(title=(f"{b['title']}"),
-          description=desc,
-          url=f"https://osu.ppy.sh/b/{id}",
-          color=16748262)
-        embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
-        embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b['beatmapset_id']}/covers/cover.jpg")
-        embed.set_footer(text=f"▶ {b['playcount']}  ❤ {b['favourite_count']} | {status} on {b['approved_date'][:10]}", icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
-        await ctx.send(embed=embed)
-
     @commands.command(pass_context=True, aliases=['opp'])
     async def pp(self, ctx, arg, *arg2):
-        id = ''
-        if arg[:8] == 'https://':
-            for i in range(len(arg) - 1, 0, -1):
-                if arg[i] == '/':
-                    break
-                id = arg[i] + id
-
-        #else:
-        print(id)
-        b = api.get_beatmaps({'b': id})
-        b = b[0]
+        bex = get_beatmap_by_link(arg)
+        b = bex.underlying
         acc = 100
         combo = b['max_combo']
         misses = 0
         mods = ''
-        link = 'https://osu.ppy.sh/osu/' + id
         for i in arg2:
             if i[0] == '+':
                 mods = i[1:].upper()
@@ -523,164 +418,30 @@ class OSU(commands.Cog):
                 acc = float(i[:-1])
             elif i[-1:] == 'm':
                 misses = int(i[:-1])
-            else:
-                if i[-1:] == 'x':
-                    combo = int(i[:-1])
-        
-        #print(mods)
-        #print(acc)
-        #print(combo)
-        urllib.request.urlretrieve(link, 'lib/map.txt')
-        pp = ppcalc.ppcalculate(float(acc), int(combo), int(misses), mods, 'lib/map.txt', feature=False)
-        print(pp)
-        difficultyMods = []
-        hasHidden = False
-        modsStr = ''
-        for i in range(0, len(mods) - 1):
-            if mods[i] == 'H':
-                if mods[(i + 1)] == 'D':
-                    hasHidden = True
-                    modsStr += modEmotes['hd']
-            if mods[i] == 'F':
-                if mods[(i + 1)] == 'L':
-                    hasHidden = True
-                    modsStr += modEmotes['fl']
-            if mods[i] == 'H':
-                if mods[(i + 1)] == 'R':
-                    difficultyMods.append('hr')
-                    modsStr += modEmotes['hr']
-                if mods[(i + 1)] == 'T':
-                    difficultyMods.append('ht')
-                    modsStr += modEmotes['ht']
-            
-            if mods[i] == 'D':
-                if mods[(i + 1)] == 'T':
-                    difficultyMods.append('dt')
-                    modsStr += modEmotes['dt']
-            if mods[i] == 'N':
-                if mods[(i + 1)] == 'C':
-                    difficultyMods.append('dt')
-                    modsStr += modEmotes['nc']
-                if mods[(i + 1)] == 'F':
-                    modsStr += modEmotes['nf']
-            if mods[i] == 'E' and mods[(i + 1)] == 'Z':
-                difficultyMods.append('ez')
-                modsStr += modEmotes['ez']
-            if mods[i] == 'S' and mods[(i + 1)] == 'O':
-                modsStr += modEmotes['so']
-        print(modsStr)
-        print(difficultyMods)
-        if mods == '':
-            mods = 'NM'
-            modsStr = 'None'
-        
-        if not hasHidden or acc == 100 or acc == 0:
-            rankLink = rankLinks['ssh']
+            elif i[-1:] == 'x':
+                combo = int(i[:-1])
+        c300, c100, c50 = pyt.acc_round(acc, bex.pyt_bm.ncircles + bex.pyt_bm.nsliders + bex.pyt_bm.nspinners, misses)
+        if len(mods) == 0:
+            modEmoteStr = "None"
         else:
-            pass
-        
-        if hasHidden and acc==100:
-            rankLink = rankLinks['ssh']
-        else:
-            if hasHidden and acc >= 93 and misses == 0:
-                rankLink = rankLinks['sh']
-            else:
-                if acc == 100 or acc == 0:
-                    rankLink = rankLinks['ss']
-                else:
-                    if acc >= 93 and misses == 0:
-                        rankLink = rankLinks['s']
-                    else:
-                        if not acc > 90 or misses == 0 or acc > 93:
-                            rankLink = rankLinks['a']
-                        else:
-                            if not acc > 80 or misses == 0 or acc > 85:
-                                rankLink = rankLinks['b']
-                            else:
-                                if acc > 70:
-                                    rankLink = rankLinks['c']
-                                else:
-                                    rankLink = rankLinks['d']
-                                    
-        status = int(b['approved'])
-        if status == 4:
-            status = 'Loved'
-        else:
-            if status == 3:
-                status = 'Qualified'
-            else:
-                if status == 2:
-                    status = 'Approved'
-                else:
-                    if status == 1:
-                        status = 'Ranked'
-                    else:
-                        if status == 0:
-                            status = 'Pending'
-                        else:
-                            if status == -1:
-                                status = 'WIP'
-                            else:
-                                if status == -2:
-                                    status = 'Graveyard'
-        if difficultyMods:
-            print('sdauijfhdufhgudf')
-            sr = round(float(b['difficultyrating']), 2)
-            sa = round(float(b['diff_aim']), 2)
-            ss = round(float(b['diff_speed']), 2)
-            length = int(b['total_length'])
-            bpm = float(b['bpm'])
-            cs = b['diff_size']
-            od = b['diff_overall']
-            ar = b['diff_approach']
-            hp = float(b['diff_drain'])
-            sr = pp[6] + f"({sr})"
-            sa = pp[4] + f"({sa})"
-            ar = pp[1] + f"({ar})"
-            od = pp[3] + f"({od})"
-            for i in difficultyMods:
-                if i == 'hr':
-                    cs = pp[2] + f"({cs})"
-                    hp = str(round(hp * 1.4, 2)) + f"({hp})"
-                if i == 'dt':
-                    ss = pp[5] + f"({ss})"
-                    length = time.strftime('%M:%S', time.gmtime(length / 1.5)) + f"({time.strftime('%M:%S', time.gmtime(length))})"
-                    bpm = str(round(bpm * 1.5, 2)) + f"({bpm})"
-                if i == 'ez':
-                    cs = pp[2] + f"({cs})"
-                    hp = str(round(hp * 0.5, 2)) + f"({hp})"
-                if i == 'ht':
-                    ss = pp[5] + f"({ss})"
-                    length = time.strftime('%M:%S', time.gmtime(length / 0.75)) + f"({time.strftime('%M:%S', time.gmtime(length))})"
-                    bpm = str(round(bpm * 0.75, 2)) + f"({bpm})"
-
-            desc = f"**Mapped by** {b['creator']}, **Song by** {b['artist']}\n**[{b['version']}]** {sr}★ \n**Aim:** {sa} **Speed:** {ss}\n**Map length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))} **BPM: **{bpm}"
-            embed = discord.Embed(title=(b['title']), url=('https://osu.ppy.sh/b/' + id), description=desc, color=16748262)
-            embed.set_author(name=(str(pp[0]) + ' pp'), icon_url=rankLink)
-            embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
-            embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b['beatmapset_id']}/covers/cover.jpg")
-            embed.add_field(name='Accuracy', value=f"{acc}%", inline=True)
-            embed.add_field(name='Misses', value=(f"{misses}"), inline=True)
-            embed.add_field(name='Combo ', value=f"{combo}x", inline=True)
-            embed.add_field(name='Mods ', value=('' + modsStr), inline=True)
-            embed.add_field(name=f"CS: {cs} OD: {od}", value=f"**AR: {ar} HP: {hp}**",
-                inline=True)
-            embed.set_footer(text=f"▶ {b['playcount']}  ❤ {b['favourite_count']} | {status}", icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
-            await ctx.send(embed=embed)
-        else:
-            desc = f"**Mapped by** {b['creator']}, **Song by** {b['artist']}\n**[{b['version']}]** {round(float(b['difficultyrating']), 2)}★ **Aim:** {round(float(b['diff_aim']), 2)} **Speed:** {round(float(b['diff_speed']), 2)}\n**Map length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))} **BPM: **{b['bpm']}"
-            embed = discord.Embed(title=(b['title']), url=('https://osu.ppy.sh/b/' + id), description=desc, color=16748262)
-            embed.set_author(name=(str(pp[0]) + ' pp'), icon_url=rankLink)
-            embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
-            embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b['beatmapset_id']}/covers/cover.jpg")
-            embed.add_field(name='Accuracy', value=f"{acc}%", inline=True)
-            embed.add_field(name='Misses', value=(f"{misses}"), inline=True)
-            embed.add_field(name='Combo ', value=f"{combo}x", inline=True)
-            embed.add_field(name='Mods ', value=('' + modsStr), inline=True)
-            embed.add_field(name=f"CS: {b['diff_size']} OD: {b['diff_overall']}", value=f"**AR: {b['diff_approach']} HP: {b['diff_drain']}**",
-                inline=True)
-            embed.set_footer(text=f"▶ {b['playcount']}  ❤ {b['favourite_count']} | {status}", icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
-            await ctx.send(embed=embed)
+            modEmoteStr = [modEmotes[mods[i:i + 1].lower()] for i in range(0, len(mods), 2)]
+        title, desc, footer = bex.make_embed()
+        embed = discord.Embed(
+            title=title,
+            url=f"https://osu.ppy.sh/b/{b.id}",
+            description=desc,
+            color=16748262)
+        pp, aim_pp, speed_pp, acc_pp = bex.pp(acc, combo, mods, misses, c300, c100, c50)
+        embed.set_author(name=f"{pp} pp ({aim_pp} aim, {speed_pp} speed, {acc_pp} acc)",
+            icon_url=rankLinks[get_letter_rank(c300, c100, c50, misses).lower()])
+        embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
+        embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b['beatmapset_id']}/covers/cover.jpg")
+        embed.add_field(name='Accuracy', value=f"{acc}%", inline=True)
+        embed.add_field(name='Misses', value=f"{misses}", inline=True)
+        embed.add_field(name='Combo ', value=f"{combo}x", inline=True)
+        embed.add_field(name='Mods ', value=modEmoteStr, inline=True)
+        embed.set_footer(text=footer, icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
+        await ctx.send(embed=embed)
 
     @commands.command(pass_context=True, aliases=['osutop', 'tp'])
     async def top(self, ctx, user=None, arg=None, num=5):
@@ -830,6 +591,7 @@ class OSU(commands.Cog):
         f2 = strain.graph('mapdata.txt', b['title'])
         await ctx.send(file=discord.File(f2, filename='file.png'))
 
+    #TODO this command doesn't seem to work in the final bot, do something about it
     @commands.command()
     async def netpp(self, ctx, user, num=-1):
         
@@ -864,7 +626,6 @@ class OSU(commands.Cog):
             temp+=tpp[i]*(0.95**i)
         temp+=playcountpp
         await ctx.send(f"```{round(float(u['pp_raw']), 2)} --> {round(temp, 2)} (+{round(temp-float(u['pp_raw']), 2)})```")
-
 
     @commands.command()
     async def mapfeed(self, ctx, arg):
@@ -905,7 +666,6 @@ class OSU(commands.Cog):
                 finally:
                     e = None
                     del e
-
         else:
             if arg == 'disable':
                 try:
@@ -939,6 +699,7 @@ class OSU(commands.Cog):
             set_servers_track(self.conn, user, get_servers_track(self.conn, user).replace(str(ctx.channel.id), ''))
         await ctx.send('Stopped tracking ' + user)
 
+    #TODO refactor me
     @commands.command(pass_context=True, aliases=['sc', 'score', 'c', 'compare'])
     async def scores(self, ctx, beatmapID=None, *args):
         id = ''
@@ -1050,7 +811,7 @@ class OSU(commands.Cog):
             fc = f"(FC: {ppcalc.ppcalculate( (300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, int(r['enabled_mods']), 'lib/map.txt', True, int(r['count50']))[0]})"
         else:
             fc = ''
-        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), usage=True)
+        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), manualcount=True)
         completed = ''
         if r['rank'] == 'F':
             completed = f"\nCompleted: {round((int(r['count50']) + int(r['count100']) + int(r['count300']) + int(r['countmiss'])) / (int(b['count_normal']) + int(b['count_slider']) + int(b['count_spinner'])) * 100, 2)}%"
@@ -1144,6 +905,7 @@ class OSU(commands.Cog):
         embed = discord.Embed(title=f"Leaderboard for {ctx.guild.name}", description=desc, color=16748262)
         await ctx.send(embed=embed)
 
+    #TODO refactor me
     @commands.command(pass_context=True, aliases=['ors', 'rs', 'rc'])
     async def recent(self, ctx, user=None):
         database = config.DB_PATH
@@ -1181,7 +943,7 @@ class OSU(commands.Cog):
             fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, int(r['enabled_mods']), 'lib/map.txt', True, int(r['count50']))[0]})"
         else:
             fc = ''
-        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), usage=True)
+        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), manualcount=True)
         completed = ''
         if r['rank'] == 'F':
             completed = f"\nCompleted: {round((int(r['count50']) + int(r['count100']) + int(r['count300']) + int(r['countmiss'])) / (int(b['count_normal']) + int(b['count_slider']) + int(b['count_spinner'])) * 100, 2)}%"
@@ -1217,6 +979,7 @@ class OSU(commands.Cog):
         self.rschannel[ctx.channel.id] = b['beatmap_id']
         print(self.rschannel);
 
+    #TODO refactor me
     @commands.command(pass_context=True, aliases=['rb'])
     async def recentbest(self, ctx, user=None, lim=50):
         database = config.DB_PATH
@@ -1461,6 +1224,7 @@ class OSU(commands.Cog):
 
             await ctx.send(embed=e)
 
+    #TODO remove me
     @commands.command()
     async def testOsu(self, ctx, user=None, arg=None, num=5):
         #await ctx.send("https://a.ppy.sh/12771805")
@@ -1468,6 +1232,8 @@ class OSU(commands.Cog):
         await ctx.send(embed=embed)
         #print(utils.get_beatmaplink_all(self.conn))
 
+    #TODO refactor me
+    # @gog - every 4 seconds seems a bit much
     @tasks.loop(seconds=4)
     async def osutracker(self):
         try:
