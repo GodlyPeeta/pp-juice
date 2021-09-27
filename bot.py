@@ -283,7 +283,7 @@ async def on_message(message):
     for e in el:
         msg2=msg2.replace(f":{e[1]}:", f"<a:{e[1]}:{e[2]}>")
     #print(msg2)
-    if False and msg2 != msg and message.author.id!=388098902680928270 and message.author.id!=329639809524170755:
+    if msg2 != msg and message.author.id!=388098902680928270:
         print("Got")
         msg2 = msg2.replace("@", "")
 
