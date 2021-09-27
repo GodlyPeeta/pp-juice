@@ -1,3 +1,6 @@
 .venv
 .vscode
 __pycache__
+map.txt
+pythonsqlite.db
+replay.lzma
