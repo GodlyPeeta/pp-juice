@@ -4,3 +4,4 @@ __pycache__
 map.txt
 pythonsqlite.db
 replay.lzma
+config.py
