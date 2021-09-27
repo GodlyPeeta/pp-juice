@@ -24,7 +24,7 @@ print("%g stars" % stars.total)
 pp, _, _, _, _ = pyt.ppv2(stars.aim, stars.speed, bmap=bmap)
 print("%g pp" % pp)'''
 
-#print(ppcalc.ppcalculate(90, 123, 0, '', 'lib/map.txt', False))
+'''#print(ppcalc.ppcalculate(90, 123, 0, '', 'lib/map.txt', False))
 
 def ppcalculate(ac, co, mi, mo, link, feature=True, c300=0, c100=0, c50=0):
     mods = pyt.mods_from_str(mo)
@@ -48,4 +48,10 @@ def ppcalculate(ac, co, mi, mo, link, feature=True, c300=0, c100=0, c50=0):
     #return round(pp.pp, 2), str(round(map.ar, 2)), str(round(map.cs, 2)), str(round(map.od, 2)), str(round(diff[0], 2)), str(round(diff[1], 2)), str(round(diff[2], 2)), map.speed, str(round(map.hp,2))
     return pp, stats[1], stats[3], stats[2], stars.aim, stars.speed, stars.total, stats[0], stats[4]
 
-print(ppcalculate(90, 123, 0, '', 'lib/map.txt', False))
+print(ppcalculate(90, 123, 0, '', 'lib/map.txt', False))'''
+
+import ppcalc
+
+#ppcalc.getReplayById(3803171282)
+
+print(ppcalc.processBeatmapIntoHitboxes("lib/map.txt"))
