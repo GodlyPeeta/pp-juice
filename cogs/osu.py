@@ -746,7 +746,10 @@ class OSU(commands.Cog):
             except:
                 await ctx.send('user has not set a profile (`pp.osuset osuUsername`)')
                 return
-        
+        # please make a better way to do this, this is just a temp fix to a bug where sometimes if someone hasnt set their username the api gets the top score on the maps lb for some fucking reason
+        if user is None:
+            await ctx.send('user has not set a profile (`pp.osuset osuUsername`)')
+            return
         #mods=mods[1:]
         mods = mods.lower()        
         diffMods=None
@@ -811,7 +814,7 @@ class OSU(commands.Cog):
             fc = f"(FC: {ppcalc.ppcalculate( (300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, int(r['enabled_mods']), 'lib/map.txt', True, int(r['count50']))[0]})"
         else:
             fc = ''
-        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), manualcount=True)
+        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), usage=True)
         completed = ''
         if r['rank'] == 'F':
             completed = f"\nCompleted: {round((int(r['count50']) + int(r['count100']) + int(r['count300']) + int(r['countmiss'])) / (int(b['count_normal']) + int(b['count_slider']) + int(b['count_spinner'])) * 100, 2)}%"
@@ -943,7 +946,7 @@ class OSU(commands.Cog):
             fc = f"(FC: {ppcalc.ppcalculate((300 * (int(r['countmiss'])) + 50 * int(r['count50']) + 100 * int(r['count100']) + 300 * int(r['count300'])) / (300 * (int(r['countmiss']) + int(r['count100']) + int(r['count50']) + int(r['count300']))) * 100, int(b['max_combo']), 0, int(r['enabled_mods']), 'lib/map.txt', True, int(r['count50']))[0]})"
         else:
             fc = ''
-        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), manualcount=True)
+        ppc = ppcalc.ppcalculate(acc * 100, int(r['maxcombo']), int(r['countmiss']), int(r['enabled_mods']), 'lib/map.txt', True, c50=int(r['count50']), c100=int(r['count100']), c300=int(r['count300']), usage=True)
         completed = ''
         if r['rank'] == 'F':
             completed = f"\nCompleted: {round((int(r['count50']) + int(r['count100']) + int(r['count300']) + int(r['countmiss'])) / (int(b['count_normal']) + int(b['count_slider']) + int(b['count_spinner'])) * 100, 2)}%"
@@ -1234,6 +1237,7 @@ class OSU(commands.Cog):
 
     #TODO refactor me
     # @gog - every 4 seconds seems a bit much
+    # @dt - i think this doesnt actually run async and pauses everything else while this is running, idk tho havent played around with this since i wrote it a year ago
     @tasks.loop(seconds=4)
     async def osutracker(self):
         try:
