@@ -76,10 +76,10 @@ def get_emotes_for_modstring(mods):
 class BeatmapEx:
     def __init__(self, u):
         self.underlying = u
-        f = http.request('GET', 'http://osu.ppy.sh/osu/' + u.id).data.decode('utf-8')
+        self.cached_sr = None
+        f = http.request('GET', 'https://osu.ppy.sh/osu/' + u.id).data.decode('utf-8')
         p = pyt.parser()
-        self.pyt_bm = p.map(iter(f.splitlines())) # Abusing python's weak typing system
-        pass
+        self.pyt_bm = p.map(f.splitlines()) # Abusing python's weak typing system
 
     def sr(self, mods):
         if self.cached_sr != None: return self.cached_sr
