@@ -408,7 +408,7 @@ class OSU(commands.Cog):
         bex = get_beatmap_by_link(arg)
         b = bex.underlying
         acc = 100
-        combo = b['max_combo']
+        combo = b["max_combo"]
         misses = 0
         mods = ''
         for i in arg2:
@@ -428,11 +428,11 @@ class OSU(commands.Cog):
         title, desc, footer = bex.make_embed()
         embed = discord.Embed(
             title=title,
-            url=f"https://osu.ppy.sh/b/{b.id}",
+            url=f"https://osu.ppy.sh/b/{b['beatmap_id']}",
             description=desc,
             color=16748262)
         pp, aim_pp, speed_pp, acc_pp = bex.pp(acc, combo, mods, misses, c300, c100, c50)
-        embed.set_author(name=f"{pp} pp ({aim_pp} aim, {speed_pp} speed, {acc_pp} acc)",
+        embed.set_author(name=f"{round(pp, 2)} pp ({round(aim_pp, 2)} aim, {round(speed_pp, 2)} speed, {round(acc_pp, 2)} acc)",
             icon_url=rankLinks[get_letter_rank(c300, c100, c50, misses).lower()])
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b['beatmapset_id']}/covers/cover.jpg")
