@@ -118,34 +118,4 @@ class BeatmapEx:
     
     def stats(self, mods):
         stats = pyt.mods_apply(mods_from_str(mods), ar=self.pyt_bm.ar, od=self.pyt_bm.od, cs=self.pyt_bm.cs, hp=self.pyt_bm.hp)
-        return { "ar": stats[1], "od": stats[2], "cs": stats[3], "hp": stats[4] }
-    
-    def make_embed(self):
-        b = self.underlying
-        title = f"{b['artist']} - {b['title']} [{b['version']}] {round(self.sr(), 2)}\u2605"
-        desc = ""
-        desc += f"**Map Length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))}"
-        desc += f" **BPM:** {b['bpm']}"
-        desc += f" **Combo:** {b['max_combo']}\n"
-        desc += f"**CS:** {b['diff_size']}"
-        desc += f" **OD:** {b['diff_overall']}"
-        desc += f" **AR:** {b['diff_approach']}"
-        desc += f" **HP:** {b['diff_drain']}\n"
-        desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})\n"
-        footer = ""
-        if b["approved_date"] == None:
-            footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']} | Not approved | Mapped by {b['creator']}"
-        else:
-            footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']} | {self.status_str()} on {b['approved_date'][:10]} | Mapped by {b['creator']}"
-        return title, desc, footer
-    
-    def make_embed_lite(self):
-        b = self.underlying
-        title = f"{b['artist']} - {b['title']}"
-        desc = ""
-        desc += f"**Map Length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))}"
-        desc += f" **BPM:** {b['bpm']}"
-        desc += f" **Mapped By:** {b['creator']}"
-        desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})"
-        footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']}"
-        return title, desc, footer
+        return { "ar": round(stats[1], 2), "od": round(stats[2], 2), "cs": round(stats[3], 2), "hp": round(stats[4], 2) }

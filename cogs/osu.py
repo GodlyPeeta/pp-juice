@@ -317,15 +317,31 @@ class OSU(commands.Cog):
 
     def beatmaplinkembed(link):
         bex = get_beatmap_by_link(link)
+        if bex == None:
+            return None
         b = bex.underlying
-        title, desc, footer = bex.make_embed()
+        title = f"{b['artist']} - {b['title']} [{b['version']}] {round(bex.sr(), 2)}\u2605"
+        desc = ""
+        desc += f"**Map Length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))}"
+        desc += f" **BPM:** {b['bpm']}"
+        desc += f" **Combo:** {b['max_combo']}\n"
+        desc += f"**CS:** {b['diff_size']}"
+        desc += f" **OD:** {b['diff_overall']}"
+        desc += f" **AR:** {b['diff_approach']}"
+        desc += f" **HP:** {b['diff_drain']}\n"
+        desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})\n"
+        footer = ""
+        if b["approved_date"] == None:
+            footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']} | Not approved | Mapped by {b['creator']}"
+        else:
+            footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']} | {bex.status_str()} on {b['approved_date'][:10]} | Mapped by {b['creator']}"
         embed = discord.Embed(
             title=title,
             description=desc,
-            url=f"https://osu.ppy.sh/b/{b.id}",
+            url=f"https://osu.ppy.sh/b/{b['beatmap_id']}",
             color=16748262)
         for acc in [90, 95, 97, 98, 99, 100]:
-            embed.add_field(acc + "%", bex.pp(acc, b.max_combo, '', 0))
+            embed.add_field(name=str(acc) + "%", value=bex.pp(acc, b['max_combo'], '', 0))
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
         embed.set_footer(text=footer, icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
         return embed
@@ -343,7 +359,13 @@ class OSU(commands.Cog):
             emoji = '💖'
         elif status == 'loved':
             emoji = '♥️'
-        title, desc, footer = bex.make_embed_lite()
+        title = f"{b['artist']} - {b['title']}"
+        desc = ""
+        desc += f"**Map Length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))}"
+        desc += f" **BPM:** {b['bpm']}"
+        desc += f" **Mapped By:** {b['creator']}"
+        desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})"
+        footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']}"
         desc = f"{emoji} **{bex.status_str()}!\n" + title + "\n" + desc
         embed = discord.Embed(description=desc,
             url=f"https://osu.ppy.sh/beatmapsets/{id}",
@@ -406,8 +428,12 @@ class OSU(commands.Cog):
     @commands.command(pass_context=True, aliases=['opp'])
     async def pp(self, ctx, arg, *arg2):
         bex = get_beatmap_by_link(arg)
+        if bex == None:
+            await ctx.send('failed to get map')
+            return
         b = bex.underlying
-        acc = 100
+        # Option parsing
+        acc = 100.0
         combo = b["max_combo"]
         misses = 0
         mods = ''
@@ -421,11 +447,42 @@ class OSU(commands.Cog):
             elif i[-1:] == 'x':
                 combo = int(i[:-1])
         c300, c100, c50 = pyt.acc_round(acc, bex.pyt_bm.ncircles + bex.pyt_bm.nsliders + bex.pyt_bm.nspinners, misses)
+        # Mods parsing
+        modsParsed = [mods[i:i + 2].lower() for i in range(0, len(mods), 2)]
         if len(mods) == 0:
             modEmoteStr = "None"
         else:
-            modEmoteStr = [modEmotes[mods[i:i + 1].lower()] for i in range(0, len(mods), 2)]
-        title, desc, footer = bex.make_embed()
+            try:
+                modEmoteStr = "".join([modEmotes[mod] for mod in modsParsed])
+            except KeyError:
+                await ctx.send('invalid mods')
+                return
+        # Stat augmentation
+        bpm = float(b['bpm'])
+        total_len = float(b['total_length'])
+        stats = bex.stats(mods)
+        if modsParsed.count("ht"):
+            bpm *= 0.75
+            total_len /= 0.75
+        if modsParsed.count("dt"):
+            bpm *= 1.5
+            total_len /= 1.5
+        # Prepare embed
+        title = f"{b['artist']} - {b['title']} [{b['version']}] {round(bex.sr(mods), 2)}\u2605"
+        desc = ""
+        desc += f"**Map Length:** {time.strftime('%M:%S', time.gmtime(int(total_len)))}"
+        desc += f" **BPM:** {bpm}"
+        desc += f" **Combo:** {combo}\n"
+        desc += f"**CS:** {stats['cs']}"
+        desc += f" **OD:** {stats['od']}"
+        desc += f" **AR:** {stats['ar']}"
+        desc += f" **HP:** {stats['hp']}\n"
+        desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})\n"
+        footer = ""
+        if b["approved_date"] == None:
+            footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']} | Not approved | Mapped by {b['creator']}"
+        else:
+            footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']} | {bex.status_str()} on {b['approved_date'][:10]} | Mapped by {b['creator']}"
         embed = discord.Embed(
             title=title,
             url=f"https://osu.ppy.sh/b/{b['beatmap_id']}",
