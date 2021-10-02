@@ -221,7 +221,7 @@ if __name__ == '__main__':
 prefix = "pp."
 intents = discord.Intents().default()
 intents.members = True
-bot = commands.Bot(command_prefix=prefix, intents=intents, proxy=config.DISCORD_PROXY)
+bot = commands.Bot(command_prefix=prefix, intents=intents)
 bot.remove_command('help')
 bot.add_cog(cogs.nh(bot))
 bot.add_cog(cogs.OSU(bot))
