@@ -467,17 +467,22 @@ class OSU(commands.Cog):
         if modsParsed.count("dt"):
             bpm *= 1.5
             total_len /= 1.5
+        # Calculation
+        pp, aim_pp, speed_pp, acc_pp = bex.pp(acc, combo, mods, misses, c300, c100, c50)
         # Prepare embed
         title = f"{b['artist']} - {b['title']} [{b['version']}] {round(bex.sr(mods), 2)}\u2605"
         desc = ""
         desc += f"**Map Length:** {time.strftime('%M:%S', time.gmtime(int(total_len)))}"
         desc += f" **BPM:** {bpm}"
         desc += f" **Combo:** {combo}\n"
-        desc += f"**CS:** {stats['cs']}"
-        desc += f" **OD:** {stats['od']}"
-        desc += f" **AR:** {stats['ar']}"
-        desc += f" **HP:** {stats['hp']}\n"
+        desc += f"**CS:** {stats['cs']} ({b['diff_size']})"
+        desc += f" **OD:** {stats['od']} ({b['diff_overall']})"
+        desc += f" **AR:** {stats['ar']} ({b['diff_approach']})"
+        desc += f" **HP:** {stats['hp']} ({b['diff_drain']})\n"
         desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})\n"
+        desc += f"**Aim:** {round(aim_pp, 2)} pp"
+        desc += f" **Speed:** {round(speed_pp, 2)} pp"
+        desc += f" **Acc:** {round(acc_pp, 2)} pp\n"
         footer = ""
         if b["approved_date"] == None:
             footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']} | Not approved | Mapped by {b['creator']}"
@@ -488,8 +493,7 @@ class OSU(commands.Cog):
             url=f"https://osu.ppy.sh/b/{b['beatmap_id']}",
             description=desc,
             color=16748262)
-        pp, aim_pp, speed_pp, acc_pp = bex.pp(acc, combo, mods, misses, c300, c100, c50)
-        embed.set_author(name=f"{round(pp, 2)} pp ({round(aim_pp, 2)} aim, {round(speed_pp, 2)} speed, {round(acc_pp, 2)} acc)",
+        embed.set_author(name=f"{round(pp, 2)} pp",
             icon_url=rankLinks[get_letter_rank(c300, c100, c50, misses).lower()])
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b['beatmapset_id']}/covers/cover.jpg")
