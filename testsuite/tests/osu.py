@@ -37,12 +37,12 @@ async def maplink_embed_infer_diff():
 
 @framework.test(group="osu")
 async def mapfeed_embed_test():
-    embed = cogs.OSU.mapfeedembed("https://osu.ppy.sh/beatmapsets/1542135", "ranked")
+    embed = cogs.OSU.mapfeedembed("https://osu.ppy.sh/beatmapsets/1357624", "ranked")
     asserts.type_equals(embed, Embed)
     asserts.embed_contains(embed, "Ranked")
-    asserts.embed_contains(embed, "VINXIS remixed by aitojames")
-    asserts.embed_contains(embed, "Sidetracked Eminem")
-    asserts.embed_contains(embed, "James May")
+    asserts.embed_contains(embed, "sabi")
+    asserts.embed_contains(embed, "true DJ MAG top ranker's song Zenpen (katagiri Remix)")
+    asserts.embed_contains(embed, "Nathan")
 
 # Section: pp.osuset Tests
 

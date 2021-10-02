@@ -45,17 +45,20 @@ def main(args):
     elif args[0] == "run-one":
         if len(args) < 2:
             print("not enough args")
-            return
+            return -2
         return run_matching(name=args[1])
     elif args[0] == "run-all":
         return run_matching()
-    elif args[0] == "debug":
+    elif args[0] == "debug-one":
         if len(args) < 2:
             print("not enough args")
-            return
+            return -2
         return run_matching(name=args[1], throw=True)
     elif args[0] == "debug-all":
         return run_matching(throw=True)
+    else:
+        print("unknown command")
+        return -2
 
 def run_matching(name=None, group=None, throw=False):
     numSuccess = 0

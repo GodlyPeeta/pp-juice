@@ -366,7 +366,7 @@ class OSU(commands.Cog):
         desc += f" **Mapped By:** {b['creator']}"
         desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})"
         footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']}"
-        desc = f"{emoji} **{bex.status_str()}!\n" + title + "\n" + desc
+        desc = f"{emoji} **{status.capitalize()}!\n" + title + "\n" + desc
         embed = discord.Embed(description=desc,
             url=f"https://osu.ppy.sh/beatmapsets/{id}",
             color=16748262)
