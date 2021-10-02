@@ -341,7 +341,7 @@ class OSU(commands.Cog):
             url=f"https://osu.ppy.sh/b/{b['beatmap_id']}",
             color=16748262)
         for acc in [90, 95, 97, 98, 99, 100]:
-            embed.add_field(name=str(acc) + "%", value=bex.pp(acc, b['max_combo'], '', 0))
+            embed.add_field(name=str(acc) + "%", value=round(bex.pp(acc, b['max_combo'], '', 0)[0], 2))
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
         embed.set_footer(text=footer, icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
         return embed
