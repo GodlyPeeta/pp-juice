@@ -1,5 +1,4 @@
 import sys
 import testsuite
-import asyncio
 
-asyncio.run(testsuite.main.main(sys.argv[1:]))
+sys.exit(testsuite.main.main(sys.argv[1:]))

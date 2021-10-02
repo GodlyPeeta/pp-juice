@@ -1,16 +1,19 @@
 from sre_constants import RANGE_UNI_IGNORE
 from testsuite import framework
+import asyncio
 
-async def run_test(test, throw=False):
+def run_test(test, throw=False):
     state = ""
     err = None
     try:
-        await test()
+        asyncio.run(asyncio.wait_for(test(), timeout=5))
         state = "OK"
     except AssertionError as e:
         state = "FAIL"
         err = e
         if throw: raise e
+    except asyncio.TimeoutError as e:
+        state = "TLE"
     except Exception as e:
         state = "ERR"
         err = e
@@ -27,10 +30,11 @@ async def run_test(test, throw=False):
         print("")
     return state
 
-async def main(args):
+def main(args):
     print("pp-juice Test Suite Made To Prevent Gog From Yelling At Me")
+    print(f"{len(framework.TEST_LIST)} tests registered")
     if len(args) == 0:
-        await run_all()
+        return run_matching()
     elif args[0] == "help":
         print("usage: test_suite.py <command> [args]")
         print("Commands:")
@@ -42,38 +46,40 @@ async def main(args):
         if len(args) < 2:
             print("not enough args")
             return
-        await run_one(args[1])
+        return run_matching(name=args[1])
     elif args[0] == "run-all":
-        await run_all()
+        return run_matching()
     elif args[0] == "debug":
         if len(args) < 2:
             print("not enough args")
             return
-        await run_one(args[1], True)
+        return run_matching(name=args[1], throw=True)
     elif args[0] == "debug-all":
-        await run_all(True)
+        return run_matching(throw=True)
 
-async def run_all(throw=False):
-    print(f"{len(framework.TEST_LIST)} tests registered")
+def run_matching(name=None, group=None, throw=False):
     numSuccess = 0
     numFailed = 0
     numErrored = 0
+    numTimeout = 0
     for test in framework.TEST_LIST:
-        result = await run_test(test, throw)
-        if result == "OK":
-            numSuccess += 1
-        elif result == "ERR":
-            numErrored += 1
-        elif result == "FAIL":
-            numFailed += 1
-    print(f"{numSuccess} passed, {numFailed} failed, {numErrored} errored")
-
-async def run_one(name, throw=False):
-    ctest = None
-    for test in framework.TEST_LIST:
-        if test.__name__ == name:
-            ctest = test
-    if ctest == None:
-        print(f"couldn't find test {name}")
-        return
-    run_test(ctest, throw)
+        ctest, cgroup = test
+        if  (name == None or name == ctest.__name__) and \
+            (group == None or group == cgroup):
+            result = run_test(ctest, throw)
+            if result == "OK":
+                numSuccess += 1
+            elif result == "ERR":
+                numErrored += 1
+            elif result == "FAIL":
+                numFailed += 1
+            elif result == "TLE":
+                numTimeout += 1
+    if numSuccess + numFailed + numErrored + numTimeout == 0:
+        print("no tests matched")
+    else:
+        print(f"{numSuccess} passed, {numFailed} failed, {numErrored} errored, {numTimeout} timed out")
+    if numFailed or numErrored or numTimeout:
+        return -1
+    else:
+        return 0

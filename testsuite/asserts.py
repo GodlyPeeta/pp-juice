@@ -14,10 +14,10 @@ def type_equals(a, t):
     raise AssertionError(f"{a} was not type {t}, instead was type {type(a)}")
 
 def embed_contains(embed, st):
-    if embed.title.count(st): return
-    if str(embed.author).count(st): return
-    if embed.description.count(st): return
-    if embed.footer.text.count(st): return
+    if embed.title and embed.title.count(st): return
+    if embed.author and str(embed.author).count(st): return
+    if embed.description and embed.description.count(st): return
+    if embed.footer and embed.footer.text.count(st): return
     for field in embed.fields:
         if field.name.count(st): return
         if field.value.count(st): return
