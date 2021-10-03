@@ -37,7 +37,7 @@ async def maplink_embed_infer_diff():
 
 @framework.test(group="osu")
 async def mapfeed_embed_test():
-    embed = cogs.OSU.mapfeedembed("https://osu.ppy.sh/beatmapsets/1357624", "ranked")
+    embed = cogs.OSU.mapfeedembed(1357624, "ranked")
     asserts.type_equals(embed, Embed)
     asserts.embed_contains(embed, "Ranked")
     asserts.embed_contains(embed, "sabi")

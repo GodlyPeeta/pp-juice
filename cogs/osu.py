@@ -347,7 +347,9 @@ class OSU(commands.Cog):
 
     def mapfeedembed(link, status):
         #print('jfkdjk')
-        bex = get_beatmap_by_link(link)
+        bex = get_beatmap_by_link("https://osu.ppy.sh/beatmapsets/" + str(link))
+        if bex == None:
+            return None
         b = bex.underlying
         emoji = ''
         if status == "disqualified":
