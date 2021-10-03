@@ -9,7 +9,7 @@ jobs:
         with:
           python-version: '3.8.0'
       - run: python -m pip install -r requirements.txt
-      - run: mkdir run ; echo "OSU_TOKEN=$OSU_TOKEN" >> run/config.ini
+      - run: mkdir run ; echo "OSU_TOKEN=$OSU_TOKEN"$'\n'"DB_PATH=run/db.sqlite" > run/config.ini
         env:
           OSU_TOKEN: ${{ secrets.OSU_TOKEN }}
       - run: python test_suite.py
