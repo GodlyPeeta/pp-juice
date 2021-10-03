@@ -7,7 +7,7 @@ from sqlite3 import Error
 import time
 from discord import Webhook, RequestsWebhookAdapter, File
 from discord.utils import get
-import config
+from utils.init_utils import config
 from datetime import date
 import datetime  
 import utils
@@ -119,20 +119,6 @@ def get_all_emotes(conn, server):
     rows = cur.fetchall()
     return rows
 
-
-def create_table(conn, create_table_sql):
-    """ create a table from the create_table_sql statement
-    :param conn: Connection object
-    :param create_table_sql: a CREATE TABLE statement
-    :return:
-    """
-    try:
-        c = conn.cursor()
-        c.execute(create_table_sql)
-    except Error as e:
-        print(e)
-
-
 def create_user(conn, user):
     """
     Create a new project into the projects table
@@ -191,33 +177,6 @@ def update_user(conn, user):
     cur.execute(sql, user)
     conn.commit()
 
-
-
-def main():
-    database = config.DB_PATH
-
-    # create a database connection
-    conn = create_connection(database)
-
-    sql_create_users_table = """ CREATE TABLE IF NOT EXISTS users (
-                                        discordID integer PRIMARY KEY,
-                                        osuUsername text
-                                    ); """
-
-    # create table
-    if conn is not None:
-        # create users table
-        create_table(conn, sql_create_users_table)
-    else:
-        print("you;re dumb")
-
-    with conn:
-        print(get_user_osu(conn, 69) + "<-- if this says \"FUCK\" that means there arent compile and sql errors, if it says something else you fucked up a lot")
-
-
-if __name__ == '__main__':
-    main()
-
 prefix = "pp."
 intents = discord.Intents().default()
 intents.members = True
@@ -235,7 +194,7 @@ stalkerBot = commands.Bot(command_prefix=prefix, intents=intents)
 current_time = datetime.datetime.now()
 lastDay = 0
 
-database = config.DB_PATH
+database = config['DB_PATH']
 # create a database connection
 conn = create_connection(database)
 @bot.event
@@ -314,5 +273,5 @@ async def on_message(message):
         await bot.process_commands(message)
 
 
-bot.run(config.DISCORD_TOKEN)
-stalkerBot.run(config.STALKER_TOKEN)
+bot.run(config['DISCORD_TOKEN'])
+stalkerBot.run(config['STALKER_TOKEN'])

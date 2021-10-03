@@ -4,7 +4,6 @@ from discord.ext import tasks
 from discord import Webhook, RequestsWebhookAdapter, File
 from discord.utils import get
 import cogs
-import config
 import time
 
 class VOICE(commands.Cog):

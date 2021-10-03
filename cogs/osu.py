@@ -7,18 +7,18 @@ import cogs, json
 from PIL import Image
 import discord.emoji, sqlite3
 from sqlite3 import Error
-import time, bitwiseEnum, threading, config, strain, requests, utils
+import time, bitwiseEnum, threading, strain, requests, utils
 from multiprocessing import Pool
 from os import getpid
 import datetime, threading, urllib.request
 import os
 import json
 import sys
+from utils.init_utils import config
 from bs4 import BeautifulSoup
 import pyttanko as pyt
 from utils import OSU_API_0 as api
 
-msgcount = 2000
 modDic = {0:'nm',
  1:'nf',
  2:'ez',
@@ -307,9 +307,8 @@ class OSU(commands.Cog):
         self.msgflag = False
         self.osutracker.start()
         self.mapfeeder.start()
-        self.database = config.DB_PATH
+        self.database = config['DB_PATH']
         self.conn = create_connection(self.database)
-        self.msgcount = 140000 - config.CUR_MESSAGE_COUNT
         self.cycle = 0
         self.last_new_mapfeed = utils.mapfeed_get_new(self.conn)[1]
         self.rschannel = {}
@@ -376,7 +375,7 @@ class OSU(commands.Cog):
 
     @commands.command()
     async def osuset(self, ctx, user=None):
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         if user is None:
             try:
@@ -396,7 +395,7 @@ class OSU(commands.Cog):
 
     @commands.command()
     async def osu(self, ctx, user=None):
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         if user is None:
             try:
@@ -506,7 +505,7 @@ class OSU(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['osutop', 'tp'])
     async def top(self, ctx, user=None, arg=None, num=5):
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         numOfPlays = 5
         if user is None:
@@ -599,7 +598,7 @@ class OSU(commands.Cog):
 
     @commands.command()
     async def osutracklist(self, ctx):
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         row = get_osutrack(conn, ctx.channel.id)
         desc = ''
@@ -618,7 +617,7 @@ class OSU(commands.Cog):
                 await ctx.send('You do not have enough permissions to do this (admin)')
                 print('ERROR, Not a admin')
                 return
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         if user is None:
             try:
@@ -792,7 +791,7 @@ class OSU(commands.Cog):
         print(user)
         print(mods)
         
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         if beatmapID != None and beatmapID[:8] == 'https://':
             for i in range(len(beatmapID) - 1, 0, -1):
@@ -911,7 +910,7 @@ class OSU(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['lb'])
     async def leaderboard(self, ctx):
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         all = get_allusers_osu(conn)
         top = {}
@@ -972,7 +971,7 @@ class OSU(commands.Cog):
     #TODO refactor me
     @commands.command(pass_context=True, aliases=['ors', 'rs', 'rc'])
     async def recent(self, ctx, user=None):
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         if user is None:
             try:
@@ -1046,7 +1045,7 @@ class OSU(commands.Cog):
     #TODO refactor me
     @commands.command(pass_context=True, aliases=['rb'])
     async def recentbest(self, ctx, user=None, lim=50):
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         if user is None:
             try:
@@ -1075,7 +1074,7 @@ class OSU(commands.Cog):
         #here
 
         
-        database = config.DB_PATH
+        database = config['DB_PATH']
         conn = create_connection(database)
         id = t[index]['beatmap_id']
         
@@ -1304,6 +1303,7 @@ class OSU(commands.Cog):
         try:
             self.cycle += 1
             lst = get_osutrack_all(self.conn)
+            if len(lst) == 0: return
             i = lst[(self.cycle % len(lst))]
             l = i[3]
             p = api.get_user_best({'u':i[0],  'limit':l})
@@ -1394,6 +1394,9 @@ class OSU(commands.Cog):
 
         except Exception as e:
             print(e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
 
     @osutracker.before_loop
     async def before_printer(self):

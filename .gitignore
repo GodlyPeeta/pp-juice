@@ -1,10 +1,10 @@
-.venv
-.vscode
-__pycache__
+.venv/
+.vscode/
+__pycache__/
+run/
+
+#TODO: remove me
 map.txt
 pythonsqlite.db
 replay.lzma
-config.py
 test.py
-
-todo.txt

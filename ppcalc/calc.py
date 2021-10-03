@@ -6,7 +6,7 @@ from ossapi import ossapi
 from PIL import Image
 import discord.emoji, sqlite3
 from sqlite3 import Error
-import time, bitwiseEnum, threading, config, strain, requests, utils
+import time, bitwiseEnum, threading, strain, requests, utils
 from multiprocessing import Pool
 from os import getpid
 import datetime, threading, urllib.request

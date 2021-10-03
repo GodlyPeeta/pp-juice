@@ -7,7 +7,7 @@ from discord.utils import get
 from discord import Webhook, RequestsWebhookAdapter, File
 from discord import *
 import utils
-import config
+from utils.init_utils import config
 from discord.ext import tasks
 import datetime
 
@@ -188,7 +188,7 @@ class GENERAL(commands.Cog):
             await ctx.send("You do not have enough permissions to do this (admin)")
             print("ERROR, Not a admin")
             return
-        database = config.DB_PATH
+        database = config['DB_PATH']
 
         # create a database connection
         conn = create_connection(database)
@@ -206,7 +206,7 @@ class GENERAL(commands.Cog):
             await ctx.send("You do not have enough permissions to do this (admin)")
             print("ERROR, Not a admin")
             return
-        database = config.DB_PATH
+        database = config['DB_PATH']
 
         # create a database connection
         conn = create_connection(database)
@@ -220,7 +220,7 @@ class GENERAL(commands.Cog):
 
     @commands.command()
     async def addemote(self, ctx, ename, emote):
-        database = config.DB_PATH
+        database = config['DB_PATH']
 
         # create a database connection
         conn = create_connection(database)
@@ -229,7 +229,7 @@ class GENERAL(commands.Cog):
 
     @commands.command()
     async def emotelist(self, ctx, page=0):
-        database = config.DB_PATH
+        database = config['DB_PATH']
 
         # create a database connection
         conn = create_connection(database)
@@ -265,7 +265,7 @@ class GENERAL(commands.Cog):
 
     @commands.command()
     async def removeemote(self, ctx, ename):
-        database = config.DB_PATH
+        database = config['DB_PATH']
 
         # create a database connection
         conn = create_connection(database)

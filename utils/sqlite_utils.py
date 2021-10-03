@@ -11,7 +11,6 @@ from sqlite3 import Error
 import time
 import bitwiseEnum
 import threading
-import config
 import strain
 import requests
 import json

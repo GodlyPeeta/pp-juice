@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 import cogs
-import config
+from utils.init_utils import config
 import sqlite3
 from sqlite3 import Error
 import utils
@@ -11,7 +11,7 @@ import random
 class RANDOM(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.database = config.DB_PATH
+        self.database = config['DB_PATH']
         # create a database connection
         self.conn = utils.create_connection(self.database)
         print("Loading 10k words...")

@@ -5,7 +5,7 @@ from discord.ext import tasks
 from ossapi import ossapi
 from PIL import Image
 import discord.emoji, sqlite3
-import config
+from utils.init_utils import config
 from multiprocessing import Pool
 from os import getpid
 import datetime, threading, urllib.request
@@ -17,7 +17,7 @@ import lzma
 import sys
 import pyttanko as pyt
 
-tokens = config.OSU_TOKEN
+tokens = config['OSU_TOKEN']
 
 def processBeatmapIntoHitboxes(maplink):
     radius = 0

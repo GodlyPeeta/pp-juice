@@ -1,7 +1,7 @@
 from bitwiseEnum.pyttanko import mods_from_str
 import urllib3
 import ossapi
-import config
+from utils.init_utils import config
 import pyttanko as pyt
 import time
 http = urllib3.PoolManager(num_pools=2)
@@ -17,7 +17,7 @@ BEATMAP_STATUS = {
 }
 
 OSU_API_N = []
-for i in config.OSU_TOKEN:
+for i in config['OSU_TOKEN'].split(","):
     OSU_API_N.append(ossapi.Ossapi(i))
 
 OSU_API_0 = OSU_API_N[0] # Compat with previous code

@@ -11,7 +11,7 @@ from sqlite3 import Error
 import time
 import bitwiseEnum
 import threading
-import config
+from utils.init_utils import config
 import strain
 import requests
 import os
@@ -54,7 +54,7 @@ def has_admin(user):
     return flag
 
 def is_owner(user):
-    if user.id == config.OWNER:
+    if user.id == config['OWNER']:
         return True
     else:
         return False
