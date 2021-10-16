@@ -19,6 +19,8 @@ from bs4 import BeautifulSoup
 import pyttanko as pyt
 from utils import OSU_API_0 as api
 
+MAPFEED_DEBUG = True
+
 modDic = {0:'nm',
  1:'nf',
  2:'ez',
@@ -310,7 +312,10 @@ class OSU(commands.Cog):
         self.database = config['DB_PATH']
         self.conn = create_connection(self.database)
         self.cycle = 0
-        self.last_new_mapfeed = utils.mapfeed_get_new(self.conn)[1]
+        if not MAPFEED_DEBUG:
+            self.last_new_mapfeed = utils.mapfeed_get_new(self.conn)[1]
+        else:
+            self.last_new_mapfeed = None
         self.rschannel = {}
         #self.last_new_mapfeed = 0
 
@@ -369,7 +374,7 @@ class OSU(commands.Cog):
         footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']}"
         desc = f"{emoji} **{status.capitalize()}!\n" + title + "\n" + desc
         embed = discord.Embed(description=desc,
-            url=f"https://osu.ppy.sh/beatmapsets/{id}",
+            url=f"https://osu.ppy.sh/beatmapsets/{str(link)}",
             color=16748262)
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
         embed.set_footer(text=footer, icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")

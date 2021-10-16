@@ -63,6 +63,32 @@ CREATE TABLE IF NOT EXISTS "webhooks" (
 	PRIMARY KEY("discordID","channelID")
 )    
 """)
+    conn.execute("""
+CREATE TABLE IF NOT EXISTS "youtubenotifs" (
+	"id"	TEXT,
+	"lastVid"	TEXT,
+	"channels"	TEXT,
+	PRIMARY KEY("id")
+)
+""")
+    conn.execute("""
+CREATE TABLE IF NOT EXISTS "ranked" (
+	"channel" INTEGER NOT NULL,
+    PRIMARY KEY("channel")
+)
+""")
+    conn.execute("""
+CREATE TABLE IF NOT EXISTS "loved" (
+	"channel" INTEGER NOT NULL,
+    PRIMARY KEY("channel")
+)
+""")
+    conn.execute("""
+CREATE TABLE IF NOT EXISTS "qualified" (
+	"channel" INTEGER NOT NULL,
+    PRIMARY KEY("channel")
+)
+""")
     conn.close()
 
 reload_config()

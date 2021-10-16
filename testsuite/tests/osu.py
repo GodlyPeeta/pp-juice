@@ -43,6 +43,7 @@ async def mapfeed_embed_test():
     asserts.embed_contains(embed, "sabi")
     asserts.embed_contains(embed, "true DJ MAG top ranker's song Zenpen (katagiri Remix)")
     asserts.embed_contains(embed, "Nathan")
+    asserts.embed_contains(embed, "https://osu.ppy.sh/beatmapsets/1357624")
 
 # Section: pp.osuset Tests
 
@@ -68,9 +69,9 @@ async def cmd_osu_normal():
     embed = fakectx.sent
     asserts.type_equals(embed, Embed)
     asserts.embed_contains(embed, "pongger")
-    asserts.embed_match(embed, r"Ranked Score:[^0-9]+115,257,297")
-    asserts.embed_match(embed, r"Hit Accuracy:[^0-9]+88.75%")
-    asserts.embed_match(embed, r"Play Count:[^0-9]+1,129")
+    asserts.embed_match(embed, r"Ranked Score:")
+    asserts.embed_match(embed, r"Hit Accuracy:")
+    asserts.embed_match(embed, r"Play Count:")
 
 @framework.test(group="osu")
 async def cmd_osu_nonexistent_user():

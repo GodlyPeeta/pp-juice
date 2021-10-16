@@ -18,6 +18,7 @@ def embed_contains(embed, st):
     if embed.author and str(embed.author).count(st): return
     if embed.description and embed.description.count(st): return
     if embed.footer and embed.footer.text.count(st): return
+    if embed.url and embed.url.count(st): return
     for field in embed.fields:
         if field.name.count(st): return
         if field.value.count(st): return
@@ -29,6 +30,7 @@ def embed_match(embed, regex):
     if p.search(str(embed.author)): return
     if p.search(embed.description): return
     if p.search(embed.footer.text): return
+    if p.search(embed.url): return
     for field in embed.fields:
         if p.search(field.name): return
         if p.search(field.value): return
