@@ -365,16 +365,15 @@ class OSU(commands.Cog):
             emoji = '💖'
         elif status == 'loved':
             emoji = '♥️'
-        title = f"{b['artist']} - {b['title']}"
+        title = f"[**{b['artist']} - {b['title']}**](https://osu.ppy.sh/beatmapsets/{str(link)})"
         desc = ""
         desc += f"**Map Length:** {time.strftime('%M:%S', time.gmtime(int(b['total_length'])))}"
-        desc += f" **BPM:** {b['bpm']}"
+        desc += f" **BPM:** {b['bpm']}\n"
         desc += f" **Mapped By:** {b['creator']}"
-        desc += f"[download](https://beatconnect.io/b/{b['beatmapset_id']})"
+        desc += f" [download](https://beatconnect.io/b/{b['beatmapset_id']})"
         footer = f"\u25b6 {b['playcount']}  \u2764 {b['favourite_count']}"
-        desc = f"{emoji} **{status.capitalize()}!\n" + title + "\n" + desc
+        desc = f"{emoji} **{status.capitalize()}!**\n" + title + "\n" + desc
         embed = discord.Embed(description=desc,
-            url=f"https://osu.ppy.sh/beatmapsets/{str(link)}",
             color=16748262)
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{b['beatmapset_id']}l.jpg")
         embed.set_footer(text=footer, icon_url=f"http://s.ppy.sh/a/{b['creator_id']}")
